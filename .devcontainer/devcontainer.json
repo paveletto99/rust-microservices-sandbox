@@ -1,0 +1,48 @@
+// For format details, see https://aka.ms/vscode-remote/devcontainer.json or this file's README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.134.0/containers/rust
+{
+	"name": "Rust DevContainer",
+	"image": "rust-devcontainer:latest",
+	/*
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	*/
+	"runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
+
+	// Set *default* container specific settings.json values on container create.
+	"settings": { 
+		"terminal.integrated.shell.linux": "/bin/bash",
+		"lldb.executable": "/usr/bin/lldb",
+		// VS Code don't watch files under ./target
+		"files.watcherExclude": {
+			"**/target/**": true
+		}
+	},
+
+	// Add the IDs of extensions you want installed when the container is created.
+	"extensions": [
+		"rust-lang.rust",
+		"bungcip.better-toml",
+		"vadimcn.vscode-lldb",
+		"mutantdino.resourcemonitor"
+	],
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "rustc --version",
+
+	// Comment out to run as root instead.
+	//"remoteUser": "vscode"
+	
+	/*
+	"remoteEnv": {
+		"ENV_VAR001": "ENV_VAR001_VALUE",
+		"ENV_VAR002": "ENV_VAR002_VALUE",
+		"ENV_VAR003": "ENV_VAR003_VALUE",
+		"ENV_VAR004": "ENV_VAR004_VALUE"
+	}
+	*/
+}
