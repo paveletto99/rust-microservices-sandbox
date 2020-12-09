@@ -36,7 +36,7 @@ amd64-release:
 kind-create-cluster:
 	@echo "Building k8s cluster"
 	@mkdir -p ~/.kube
-	kind create cluster --kubeconfig ~/.kube/kind-kubernetes-clusters.kubeconfig --image="kindest/node:v1.19.4@sha256:796d09e217d93bed01ecf8502633e48fd806fe42f9d02fdd468b81cd4e3bd40b" --name="cluster-dev01"
+	kind create cluster --kubeconfig ~/.kube/kind-kubernetes-clusters.kubeconfig --image="kindest/node:v1.20.0@sha256:b40ecf8bcb188f6a0d0f5d406089c48588b75edc112c6f635d26be5de1c89040" --name="cluster-dev01"
 
 run:
 	cargo run
