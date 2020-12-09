@@ -125,13 +125,13 @@ $ kind delete cluster --name <CLUSTER_NAME>
 > For the Rust application and the setup of this project the following command was used:
 
 ```bash
-$ cargo init rust-microservices
+$ cargo init RustMicroservicesSandbox
 ```
 
 > For initilaizing Rust projects in Devcontainer (Ctrl + Shift + P) you must use the following commad instead
 
 ```bash
-$ export USER=root && cargo init rust-microservices
+$ export USER=root && cargo init RustMicroservicesSandbox
 ```
 
 >The application uses **Actix Web** as web framework
@@ -143,6 +143,50 @@ $ export USER=root && cargo init rust-microservices
 ```bash
 $ cargo update
 ```
+
+>The web application structure aims to apply the ***Separation of Concerns*** (SoC) principle of Software Design
+>
+>From this principle derive the **S**ingle Responsibility and the **I**nterface Segregation principles of the **S.O.L.I.D.** Design.
+>
+>To accomplish that the web application adheres to the concept of ***"separating code by features not functionalities"***
+>
+>Simply put, ***"package by feature, not by layers"***, **DO NOT** group togheter routing handlers, service or data access layers:
+
+```bash
+$ tree --dirsfirst -L 2 src/api/services/
+src/api/services/
+├── customers
+│   ├── Controller.rs
+│   ├── Model.rs
+│   ├── mod.rs
+│   ├── Repository.rs
+│   ├── Resource.rs
+│   └── Service.rs
+├── invoices
+│   ├── Controller.rs
+│   ├── Model.rs
+│   ├── mod.rs
+│   ├── Repository.rs
+│   ├── Resource.rs
+│   └── Service.rs
+├── orders
+│   ├── Controller.rs
+│   ├── Model.rs
+│   ├── mod.rs
+│   ├── Repository.rs
+│   ├── Resource.rs
+│   └── Service.rs
+├── users
+│   ├── Controller.rs
+│   ├── Model.rs
+│   ├── mod.rs
+│   ├── Repository.rs
+│   ├── Resource.rs
+│   └── Service.rs
+└── mod.rs
+```
+
+>This will allow application enhancements only by loading or unloading features modules and mounting or umounting features routes in the **main.rs**
 
 ## Recomended VSCode extensions
 
