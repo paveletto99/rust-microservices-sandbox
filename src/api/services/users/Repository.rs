@@ -1,29 +1,69 @@
-
-use std::io::Error;
-use deadpool_postgres::{Client, Pool};
 use super::Model::User;
+use chrono::DateTime;
+use chrono::Local;
+use chrono::Utc;
+use deadpool_postgres::{Client, Pool};
+use std::io::Error;
 
 pub struct Repository {
-    pgPool: Pool
+    pgPool: Pool,
 }
 
 impl Repository {
-
-    pub fn New( pgPool: Pool ) -> Self {
+    pub fn New(pgPool: Pool) -> Self {
         Self { pgPool }
     }
 
-    pub async fn getUser( &self ) -> Result<Option<User>, Error> {
-        let _client: Client = self.pgPool.get().await.unwrap();
-        Ok(Some(User{}))
+    pub async fn get_user(&self, user_id: u32) -> Result<User, Error> {
+        let pg_id = user_id as i32; // cast to i32 https://doc.rust-lang.org/1.30.0/book/first-edition/casting-between-types.html
+        let client: Client = self.pgPool.get().await.unwrap();
+        let stmt = client
+            .prepare(
+                "SELECT username, password, email, created_on FROM accounts WHERE user_id = $1",
+            )
+            .await
+            .unwrap();
+        let rows = client.query(&stmt, &[&pg_id]).await.unwrap();
+        // prepare ouput
+        let mut user: User = User::default();
+        if rows.len() == 1 {
+            user.set_username(rows[0].get(0));
+            user.set_password(rows[0].get(1));
+            user.set_email(rows[0].get(2));
+            user.set_created_on(rows[0].get(3));
+        }
+        Ok(user)
     }
 
-    pub async fn getAllUsers( &self ) -> Result<Vec<User>, Error> {
-        Ok(vec![User{}, User{}])
+    pub async fn add_user(&self, user: User) -> Result<User, Error> {
+        let client: Client = self.pgPool.get().await.unwrap();
+        // covert timezone
+        let local_time = Local::now();
+        let utc_time = DateTime::<Utc>::from_utc(local_time.naive_utc(), Utc);
+        client
+            .execute(
+                "INSERT INTO accounts (username, password, email, created_on) VALUES ($1, $2, $3, $4)",
+                &[
+                    &user.get_username(),
+                    &user.get_email(),
+                    &user.get_email(),
+                    &utc_time,
+                ],
+            )
+            .await
+            .unwrap();
+
+        //temp code
+        let user: User = User::default();
+        Ok(user)
     }
 
-    pub async fn getAllUsersOption( &self ) -> Result<Option<Vec<User>>, Error> {
-        let _client: Client = self.pgPool.get().await.unwrap();
-        Ok(Some(vec![User{}, User{}]))
-    }
+    // pub async fn getAllUsers( &self ) -> Result<Vec<User>, Error> {
+    //     Ok(vec![User{}, User{}])
+    // }
+
+    // pub async fn getAllUsersOption( &self ) -> Result<Option<Vec<User>>, Error> {
+    //     let _client: Client = self.pgPool.get().await.unwrap();
+    //     Ok(Some(vec![User{}, User{}]))
+    // }
 }

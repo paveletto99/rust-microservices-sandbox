@@ -1,14 +1,29 @@
 export PG_HOST=127.0.0.1
-export PG_PORT=5433
+export PG_PORT=5432
 export PG_USER=postgres
-export PG_PASS=
+export PG_PASS=Pass2020!
 export PG_DBNAME=postgres
 export PG_DSN=postgresql://${PG_USER}:${PG_PASS}@${PG_HOST}:${PG_PORT}/${PG_DBNAME}?connect_timeout=10
+# export PG_HOST=127.0.0.1
+# export PG_PORT=5433
+# export PG_USER=postgres
+# export PG_PASS=
+# export PG_DBNAME=postgres
+# export PG_DSN=postgresql://${PG_USER}:${PG_PASS}@${PG_HOST}:${PG_PORT}/${PG_DBNAME}?connect_timeout=10
+# dev on docker vars
+# export PG_HOST_DEV_DK=172.17.0.2
+# export PG_PORT_DEV_DK=5432
+# export PG_USER_DEV_DK=postgres
+# export PG_PASS_DEV_DK=Pass2020!
+# export PG_DBNAME_DEV_DK=postgres
+# export PG_DSN_DEV_DK=postgresql://${PG_USER_DEV_DK}:${PG_PASS_DEV_DK}@${PG_HOST_DEV_DK}:${PG_PORT_DEV_DK}/${PG_DBNAME_DEV_DK}?connect_timeout=10
+# export PGADMIN_DEFAULT_EMAILE_DEV_DK=user@domain.local
+# export PGADMIN_DEFAULT_PASSWORDE_DEV_DK=SuperSecret
 
 DEV_CONTAINER_IMAGE_NAME = rust-devcontainer:latest
 DOCKER_IMAGE_NAME = rust-container:latest
 CURRENT_IMAGE_ID = $(shell docker images -q ${DEV_CONTAINER_IMAGE_NAME})
-DELETE_IMAGE = 
+DELETE_IMAGE =
 
 ifneq ($(strip ${CURRENT_IMAGE_ID}),)
 DELETE_IMAGE_CMD = docker rmi ${CURRENT_IMAGE_ID}
@@ -49,3 +64,31 @@ docker-images:
 
 docker-start:
 	docker run --rm -d -e PG_HOST -e PG_PORT -e PG_USER -e PG_PASS -e PG_DBNAME -p 9000:9000 rust-devcontainer:latest
+
+
+# PG dev on Docker
+# docker run -d \
+# 	--name dev-postgres \
+# 	-e POSTGRES_PASSWORD=Pass2020! \
+# 	-v ${HOME}/postgres-data/:/var/lib/postgresql/data \
+#         -p 5432:5432 \
+#         postgres
+
+
+
+#  docker exec -it dev-postgres bash
+# psql -h localhost -U postgres
+
+
+# docker run \
+#     -p 80:80 \
+#     -e 'PGADMIN_DEFAULT_EMAIL=user@domain.local' \
+#     -e 'PGADMIN_DEFAULT_PASSWORD=SuperSecret' \
+#     --name dev-pgadmin \
+#     -d dpage/pgadmin4
+
+
+# docker inspect dev-postgres -f "{{json .NetworkSettings.Networks }}"
+
+
+# curl -d '{"username":"pobo","password":"secret1!","email":"pobo@rust.com"}' -H "Content-Type: application/json" -X POST http://localhost:9000/api/v1/users/

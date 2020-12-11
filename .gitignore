@@ -1,3 +1,4 @@
 /target
 NOTES
 *.bkp
+.vscode/settings.json

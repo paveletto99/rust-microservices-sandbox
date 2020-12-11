@@ -9,12 +9,14 @@ dependencies = [
  "actix-web-httpauth",
  "async-trait",
  "bytes 0.6.0",
+ "chrono",
  "deadpool-postgres",
  "env_logger",
  "futures",
  "jsonwebtoken",
  "serde",
  "serde_json",
+ "time 0.1.44",
  "tokio-postgres",
  "uuid",
 ]
@@ -1441,6 +1443,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cfc08a7d94a80665de4a83942fa8db2fdeaf2f123fc0535e384dc4fff251efae"
 dependencies = [
  "bytes 0.5.6",
+ "chrono",
  "fallible-iterator",
  "postgres-protocol",
 ]
