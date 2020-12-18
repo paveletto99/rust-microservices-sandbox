@@ -1,0 +1,183 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rust-microservices-sandbox-deployment
+  labels:
+    app: RustMicroservicesSandbox
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app: RustMicroservicesSandbox
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: RustMicroservicesSandbox
+    spec:
+      containers:
+
+        # PostgreSQL
+        - name: postgresql-service
+          image: postgres:alpine
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-config
+          
+          #restartPolicy: OnFailure
+          volumeMounts:
+            - name: postgresql-storage
+              mountPath: /data/postgresql
+        
+        # MongoDB
+        - name: mongo-service
+          image: mongo:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+          ports:
+            - containerPort: 27017
+          envFrom:
+            - configMapRef:
+                name: mongo-config
+          volumeMounts:
+            - name: mongo-storage
+              mountPath: /data/mongo
+        
+        # Redis
+        - name: redis-service
+          image: redis:alpine
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+          - name: redis-storage
+            mountPath: /data/redis
+        
+        # Application
+        - name: rust-service
+          image: localhost:5000/rust-container:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+          ports:
+            - containerPort: 9000
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 25
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 20
+          envFrom:
+            - configMapRef:
+                name: application-config
+      
+      # Volumes definitions
+      volumes:
+        - name: postgresql-storage
+          emptyDir: {}
+        - name: mongo-storage
+          emptyDir: {}
+        - name: redis-storage
+          emptyDir: {}
+
+---
+
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-rust-microservices-sandbox
+  namespace: dev
+spec:
+  selector:
+    app: RustMicroservicesSandbox
+  ports:
+    - name: postgres
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
+    - name: mongo
+      protocol: TCP
+      port: 27018
+      targetPort: 27017
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+    - name: http
+      protocol: TCP
+      port: 9000
+      targetPort: 9000
+
+---
+
+# TLS Secret
+#apiVersion: v1
+#kind: Secret
+#metadata:
+#    name: host-secret-tls
+#    namespace: dev
+#data:
+#  tls.crt: base64 encoded cert
+#  tls.key: base64 encoded key
+#type: kubernetes.io/tls
+
+---
+# Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-rust-microservices-sandbox
+  namespace: dev
+spec:
+#  tls:
+#    - hosts:
+#        - localhost
+#      secretName: host-secret-tls
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: svc-rust-microservices-sandbox
+                port:
+                  number: 9000

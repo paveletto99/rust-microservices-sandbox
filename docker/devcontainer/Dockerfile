@@ -21,7 +21,7 @@ RUN apt-get update && \
     /tmp/rustup-init.sh -q -y -t aarch64-unknown-linux-musl x86_64-unknown-linux-musl && \
     rm -f /tmp/*.sh
 
-ENV PATH "/root/.cargo/bin:${ARM64_BIN_PATH}:${AMD64_BIN_PATH}:${PATH}"
+ENV PATH "/root/.cargo/bin:${PATH}"
 
 COPY ./cargo-config /root/.cargo/config
 

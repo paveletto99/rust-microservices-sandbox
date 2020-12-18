@@ -67,7 +67,7 @@ $ make kind-create-cluster
 >
 
 ```bash
-$ ls ~/.kube/kind-kubernetes-clusters.kubeconfig
+$ ls ~/.kube/kind-kubernetes-clusters-${CLUSTER_NAME}.kubeconfig
 ```
 >
 >With **kind** you can create as many **Kubernetes Clusters** you want also outside this project and of different type like **Multi-node clusters** (***one control-plane*** and ***many worker node***) or **Control-plane HA** (***multiple control-plane in HA*** and ***many worker node*** )
@@ -78,7 +78,7 @@ $ ls ~/.kube/kind-kubernetes-clusters.kubeconfig
 >The path to this configuration file must be exported into an environment variable to be able to interact with the **Kubernetes Clusters**
 
 ```bash
-$ export KUBECONFIG=~/.kube/kind-kubernetes-clusters.kubeconfig
+$ export KUBECONFIG=~/.kube/kind-kubernetes-clusters-${CLUSTER_NAME}.kubeconfig
 ```
 >
 >Then you can use the **kubectl** command as usual to interact with your Kubernetes Cluster
@@ -88,7 +88,7 @@ $ export KUBECONFIG=~/.kube/kind-kubernetes-clusters.kubeconfig
 $ kubectl get pods -A
 ```
 >
->If you have more than one **kind Kubernetes Cluster** running on Docker in your host machine configured in the same **KUBECONFIG** configuration file, you can use the following option to specify the cluster:
+>If you have instead more than one **kind Kubernetes Cluster** running on Docker in your host machine configured in the same **KUBECONFIG** configuration file, you can use the following option to specify the cluster:
 >> **--context kind-<CLUSTER_NAME>**
 >
 
@@ -101,11 +101,121 @@ $ kubectl get pods --context kind-<CLUSTER_NAME> -A
 
 ```bash
 export CLUSTER_NAME=cluster-dev01
-kind create cluster --kubeconfig ~/.kube/kind-kubernetes-cluster-${CLUSTER_NAME}.kubeconfig --image="kindest/node:v1.19.4@sha256:796d09e217d93bed01ecf8502633e48fd806fe42f9d02fdd468b81cd4e3bd40b" --name="${CLUSTER_NAME}"
+kind create cluster --kubeconfig ~/.kube/kind-kubernetes-clusters-${CLUSTER_NAME}.kubeconfig --image="kindest/node:v1.20.0@sha256:b40ecf8bcb188f6a0d0f5d406089c48588b75edc112c6f635d26be5de1c89040" --name="${CLUSTER_NAME}"
 ```
+
 >Then you can use the specific configuration file
+
 ```bash
 $ export KUBECONFIG=~/.kube/kind-kubernetes-clusters-cluster-dev01.kubeconfig
+```
+
+## Installing the Dashboard UI
+>
+>NOTE: **The some of the following setup commands are used at Kubernetes Cluster creation time**
+>
+>Reported here for a detailed explaination
+>
+
+```bash
+$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.1.0/aio/deploy/recommended.yaml
+```
+
+>Creating a **ServiceAccount** user with **cluster-admin** RoleBinding (see the link at the end of the document)
+
+```yaml
+$ cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+EOF
+
+$ cat <<EOF | kubectl apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+EOF
+```
+
+>Check the **ClusterRoleBinding** exists
+
+```bash
+$ kubectl get clusterrolebindings -A | grep cluster-admin
+```
+
+>Getting a Bearer Token for the Dashboard login
+
+```bash
+$ kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}') | grep token: | awk -F 'token:' '{print $2}' | sed 's/ //g'
+```
+
+>After exporting the environment variable **KUBECONFIG** you can also use the following command to get a token for accessing the UI Dashboard
+
+```bash
+$ make get-cluster-token
+```
+
+>Use the default token
+
+```bash
+$ kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep default-token | awk '{print $1}') | grep token: | awk -F 'token:' '{print $2}' | sed 's/ //g'
+```
+
+>Start the proxy
+
+```bash
+$ kubectl proxy
+```
+
+>Open the brower pointing to the following link
+>
+><http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/>
+
+>
+>Create a **dev** namespace and check that it's correctly created
+>
+
+```bash
+$ kubectl apply -f kubernetes/01-namespace.yaml
+$ kubectl get namespaces -A | grep dev
+```
+>
+>Create the **ConfigMap** for storing services environment variables and check that they are correctly created
+>
+
+```bash
+$ kubectl apply -f kubernetes/02-mongo-configmap.yaml
+$ kubectl apply -f kubernetes/03-postgresql-configmap.yaml
+$ kubectl apply -f kubernetes/04-application-configmap.yaml
+$ kubectl get configmaps -n dev
+```
+>
+>For deploying the application run
+>
+
+```bash
+$ kubectl apply -f kubernetes/05-application-deployment.yaml
+```
+
+>
+>You can find useful running this command for deploying/undeploying the Kubernetes configurations of the application
+>
+
+```bash
+$ make deploy-kubernetes
+
+$ make undeploy-kubernetes
 ```
 
 >For removing a cluster simply run
@@ -113,11 +223,50 @@ $ export KUBECONFIG=~/.kube/kind-kubernetes-clusters-cluster-dev01.kubeconfig
 ```bash
 $ kind delete cluster --name <CLUSTER_NAME>
 ```
+
+> Or for cleaning up also the connection of the registry container with the **kind** network
+
+```bash
+$ make kind-delete-cluster
+```
+
+## Misc useful commands
+
+>
+>Removing service account
+>
+
+```bash
+$ kubectl -n kubernetes-dashboard delete serviceaccount admin-user
+$ kubectl -n kubernetes-dashboard delete clusterrolebinding admin-user
+```
+
+>
+>Editing an Ingress configuration
+>
+```bash
+$ kubectl describe ingress -A
+$ kubectl edit ingress ingress-rust-microservices-sandbox -n dev
+```
+>
+>Getting informations about deployments and services
+>
+
+```bash
+$ kubectl get deployment -l app=RustMicroservicesSandbox -o wide -n dev
+$ kubectl describe svc -n dev
+$ kubectl describe deployments -A
+$ kubectl describe deployments -n dev
+$ kubectl get svc svc-rust-microservices-sandbox -n dev
+$ kubectl describe svc svc-rust-microservices-sandbox -n dev
+$ kubectl get ep svc-rust-microservices-sandbox -n dev
+```
+
 >
 >The main advantages of using **kind** are:
 >
 > 1. It's possible clean up all with simple commands
-> 2. Kubernetes Clusters running on a docker container share the resources with the host machine; this differs from how **minikube** works as it'is require a VM with preallocated resources
+> 2. Kubernetes Clusters running on a docker container share the resources with the host machine; this differs from how **minikube** works as it requires a VM with preallocated resources
 >
 
 ## The Rust application
@@ -204,3 +353,4 @@ src/api/services/
 * [Install and Set Up kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl)
 * [kind - Running Kubernetes Clusters in Docker](https://kind.sigs.k8s.io)
 * [kind - Quick Start](https://kind.sigs.k8s.io/docs/user/quick-start)
+* [Kubernetes - Creating sample admin ServiceAccount user with cluster-admin RoleBinding](https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md)
