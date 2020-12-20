@@ -35,7 +35,7 @@ export KUBECONFIG=${KIND_KUBECONFIG_FILE}
 
 build-devcontainer:
 	$(DELETE_IMAGE_CMD)
-	docker build -t $(DEV_CONTAINER_IMAGE_NAME) -f ./docker/devcontainer/Dockerfile ./docker/devcontainer
+	docker build --pull -t $(DEV_CONTAINER_IMAGE_NAME) -f ./docker/devcontainer/Dockerfile ./docker/devcontainer
 
 arm64-release: TARGET=aarch64-unknown-linux-musl
 arm64-release: CC="/opt/musl-toolchains/aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc"
@@ -72,12 +72,12 @@ start:
 	target/x86_64-unknown-linux-musl/release/RustMicroservicesSandbox
 
 docker-build-image:
-	docker build -t ${DOCKER_IMAGE_NAME} -f ./docker/images/Dockerfile .
+	docker build --pull -t ${DOCKER_IMAGE_NAME} -f ./docker/images/Dockerfile .
 	docker tag ${DOCKER_IMAGE_NAME} localhost:5000/${DOCKER_IMAGE_NAME}
 	docker push localhost:5000/${DOCKER_IMAGE_NAME}
 
 docker-start:
-	docker run --rm -d -e PG_HOST -e PG_PORT -e PG_USER -e PG_PASS -e PG_DBNAME -p 9000:9000 ${DOCKER_IMAGE_NAME}
+	docker run --rm -d --net=host -e PG_HOST -e PG_PORT -e PG_USER -e PG_PASS -e PG_DBNAME -p 9000:9000 ${DOCKER_IMAGE_NAME}
 
 get-cluster-token:
 	kubectl -n kubernetes-dashboard describe secret $$(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $$1}') | grep token: | awk -F 'token:' '{print $$2}' | sed 's/ //g'
