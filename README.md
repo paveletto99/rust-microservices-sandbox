@@ -354,3 +354,18 @@ src/api/services/
 * [kind - Running Kubernetes Clusters in Docker](https://kind.sigs.k8s.io)
 * [kind - Quick Start](https://kind.sigs.k8s.io/docs/user/quick-start)
 * [Kubernetes - Creating sample admin ServiceAccount user with cluster-admin RoleBinding](https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md)
+
+## Must-read
+
+### Articles
+
+* [ExpressJS vs Actix-Web. It is exactly what you think](https://medium.com/@maxsparr0w/performance-of-node-js-compared-to-actix-web-37f20810fb1a)
+  
+  >Actix-web and Rust ecosystem are a good fit for developing efficient web services, requiring **~6 times less CPU power and less memory** it would allow significant **75%-95% runtime cost saving** with just basic not optimized setup.
+
+### Blogs
+
+* [Luca Palmieri's Blog - A learning journal](https://www.lpalmieri.com)
+  * [Book - **"Zero To Production In Rust"**](https://www.lpalmieri.com/posts/2020-05-24-zero-to-production-0-foreword)
+  * [Using Types To Guarantee Domain Invariants - Validation - Type-Driven Development - Error As Values](https://www.lpalmieri.com/posts/2020-12-11-zero-to-production-6-domain-modelling/)
+  * [How To Bootstrap A Rust Web API From Scratch - Our First Integration Test](https://www.lpalmieri.com/posts/2020-08-09-zero-to-production-3-how-to-bootstrap-a-new-rust-web-api-from-scratch/)
