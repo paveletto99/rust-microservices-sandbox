@@ -1,6 +1,8 @@
-// use chrono::{DateTime, Utc};
 use serde::Serialize;
 use serde::Deserialize;
+use chrono::{DateTime, Utc};
+
+
 #[derive(Default, Serialize, Deserialize)]
 pub struct User {
     user_id: Option<i32>,
@@ -35,8 +37,8 @@ impl User {
     pub fn get_email(&self) -> &String {
         &self.email
     }
-    pub fn set_created_on(&mut self, created_on: String) {
-        self.created_on = Some(created_on)
+    pub fn set_created_on(&mut self, created_on: DateTime<Utc>) {
+        self.created_on = Some(created_on.to_rfc3339())
     }
 
     // pub fn get_created_on(&self) -> &String {
