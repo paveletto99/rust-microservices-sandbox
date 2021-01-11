@@ -48,10 +48,11 @@ impl Repository {
         // prepare ouput
         let mut user: User = User::default();
         if rows.len() == 1 {
-            user.set_username(rows[0].get(0));
-            user.set_password(rows[0].get(1));
-            user.set_email(rows[0].get(2));
-            user.set_created_on(rows[0].get(3));
+            user.set_id(rows[0].get(0));
+            user.set_username(rows[0].get(1));
+            user.set_password(rows[0].get(2));
+            user.set_email(rows[0].get(3));
+            user.set_created_on(rows[0].get(4));
         }
         Ok(user)
     }

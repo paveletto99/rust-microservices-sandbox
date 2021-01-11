@@ -5,7 +5,7 @@ use chrono::{DateTime, Utc};
 
 #[derive(Default, Serialize, Deserialize)]
 pub struct User {
-    user_id: Option<i32>,
+    user_id: Option<u32>,
     username: String,
     password: String,
     email: String,
@@ -14,6 +14,14 @@ pub struct User {
 }
 
 impl User {
+    pub fn set_id(&mut self, id: i32) {
+        self.user_id = Some(id as u32)
+    }
+
+    pub fn get_id(self) -> u32 {
+        self.user_id.unwrap_or_default()
+    }
+
     pub fn set_username(&mut self, username: String) {
         self.username = username
     }
@@ -41,7 +49,7 @@ impl User {
         self.created_on = Some(created_on.to_rfc3339())
     }
 
-    // pub fn get_created_on(&self) -> &String {
-    //     &self.created_on.unwrap()
-    // }
+    pub fn get_created_on(self) -> String {
+        self.created_on.unwrap_or_default()
+    }
 }
