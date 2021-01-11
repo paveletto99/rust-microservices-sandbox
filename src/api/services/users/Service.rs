@@ -31,4 +31,14 @@ impl Service {
         user.set_email(url_params.get_email().to_string());
         Ok(self.repository.add_user(user).await?)
     }
+
+    pub async fn update_user(&self, url_params: web::Json<User>) -> Result<User, Error> {
+        // map user
+        let mut user: User = User::default();
+        user.set_id(url_params.get_id() as i32);
+        user.set_username(url_params.get_username().to_string());
+        user.set_password(url_params.get_password().to_string());
+        user.set_email(url_params.get_email().to_string());
+        Ok(self.repository.update_user(user).await?)
+    }
 }

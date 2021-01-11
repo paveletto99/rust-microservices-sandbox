@@ -18,8 +18,8 @@ impl User {
         self.user_id = Some(id as u32)
     }
 
-    pub fn get_id(self) -> u32 {
-        self.user_id.unwrap_or_default()
+    pub fn get_id(&self) -> i32 {
+        self.user_id.unwrap() as i32
     }
 
     pub fn set_username(&mut self, username: String) {
@@ -49,7 +49,7 @@ impl User {
         self.created_on = Some(created_on.to_rfc3339())
     }
 
-    pub fn get_created_on(self) -> String {
-        self.created_on.unwrap_or_default()
-    }
+    // pub fn get_created_on(&self) -> String {
+    //     self.created_on.unwrap_or_default()
+    // }
 }

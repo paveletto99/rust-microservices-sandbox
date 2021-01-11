@@ -19,7 +19,7 @@ impl Repository {
         let client: Client = self.pgPool.get().await.unwrap();
         let stmt = client
             .prepare(
-                "SELECT username, password, email, created_on FROM accounts WHERE user_id = $1",
+                "SELECT user_id, username, password, email, created_on FROM accounts WHERE user_id = $1",
             )
             .await
             .unwrap();
@@ -27,10 +27,11 @@ impl Repository {
         // prepare ouput
         let mut user: User = User::default();
         if rows.len() == 1 {
-            user.set_username(rows[0].get(0));
-            user.set_password(rows[0].get(1));
-            user.set_email(rows[0].get(2));
-            user.set_created_on(rows[0].get(3));
+            user.set_id(rows[0].get(0));
+            user.set_username(rows[0].get(1));
+            user.set_password(rows[0].get(2));
+            user.set_email(rows[0].get(3));
+            user.set_created_on(rows[0].get(4));
         }
         Ok(user)
     }
@@ -68,7 +69,7 @@ impl Repository {
                 "INSERT INTO accounts (username, password, email, created_on) VALUES ($1, $2, $3, $4)",
                 &[
                     &user.get_username(),
-                    &user.get_email(),
+                    &user.get_password(),
                     &user.get_email(),
                     &utc_time,
                 ],
@@ -81,12 +82,26 @@ impl Repository {
         Ok(user)
     }
 
-    // pub async fn getAllUsers( &self ) -> Result<Vec<User>, Error> {
-    //     Ok(vec![User{}, User{}])
-    // }
+    pub async fn update_user(&self, user: User) -> Result<User, Error> {
+        let client: Client = self.pgPool.get().await.unwrap();
+        client
+            .execute("
+                UPDATE accounts
+                SET username = $2, password = $3, email = $4
+                WHERE user_id = $1
+                ",
+                &[
+                    &user.get_id(),
+                    &user.get_username(),
+                    &user.get_password(),
+                    &user.get_email(),
+                ],
+            )
+            .await
+            .unwrap();
 
-    // pub async fn getAllUsersOption( &self ) -> Result<Option<Vec<User>>, Error> {
-    //     let _client: Client = self.pgPool.get().await.unwrap();
-    //     Ok(Some(vec![User{}, User{}]))
-    // }
+        //temp code
+        let user: User = User::default();
+        Ok(user)
+    }
 }
