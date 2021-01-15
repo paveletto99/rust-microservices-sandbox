@@ -6,12 +6,16 @@ pub struct Controller;
 
 impl Controller {
     pub fn set_up_service(service_cfg: &mut web::ServiceConfig) {
-        service_cfg.service(web::resource("/{user_id}")
-            .route(web::delete().to(Self::delete_user_handler))
-            .route(web::get().to(Self::get_user_handler)));
-        service_cfg.service(web::resource("/")
-            .route(web::patch().to(Self::update_users_handler))
-            .route(web::post().to(Self::add_users_handler)));
+        service_cfg.service(
+            web::resource("/{user_id}")
+                .route(web::delete().to(Self::delete_user_handler))
+                .route(web::get().to(Self::get_user_handler)),
+        );
+        service_cfg.service(
+            web::resource("/")
+                .route(web::patch().to(Self::update_users_handler))
+                .route(web::post().to(Self::add_users_handler)),
+        );
     }
 
     async fn get_user_handler(

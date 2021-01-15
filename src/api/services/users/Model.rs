@@ -1,7 +1,6 @@
-use serde::Serialize;
-use serde::Deserialize;
 use chrono::{DateTime, Utc};
-
+use serde::Deserialize;
+use serde::Serialize;
 
 #[derive(Default, Serialize, Deserialize)]
 pub struct User {

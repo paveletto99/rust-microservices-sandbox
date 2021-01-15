@@ -36,13 +36,11 @@ impl Repository {
         Ok(user)
     }
 
-        pub async fn delete_user(&self, user_id: u32) -> Result<User, Error> {
+    pub async fn delete_user(&self, user_id: u32) -> Result<User, Error> {
         let pg_id = user_id as i32; // cast to i32 https://doc.rust-lang.org/1.30.0/book/first-edition/casting-between-types.html
         let client: Client = self.pgPool.get().await.unwrap();
         let stmt = client
-            .prepare(
-                "DELETE FROM accounts WHERE user_id = $1 RETURNING *",
-            )
+            .prepare("DELETE FROM accounts WHERE user_id = $1 RETURNING *")
             .await
             .unwrap();
         let rows = client.query(&stmt, &[&pg_id]).await.unwrap();
@@ -57,7 +55,6 @@ impl Repository {
         }
         Ok(user)
     }
-
 
     pub async fn add_user(&self, user: User) -> Result<User, Error> {
         let client: Client = self.pgPool.get().await.unwrap();
@@ -85,7 +82,8 @@ impl Repository {
     pub async fn update_user(&self, user: User) -> Result<User, Error> {
         let client: Client = self.pgPool.get().await.unwrap();
         client
-            .execute("
+            .execute(
+                "
                 UPDATE accounts
                 SET username = $2, password = $3, email = $4
                 WHERE user_id = $1

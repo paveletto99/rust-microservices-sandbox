@@ -1,8 +1,8 @@
 use super::Model::User;
 use super::Repository::Repository;
+use actix_web::web;
 use deadpool_postgres::Pool;
 use std::io::Error;
-use actix_web::{web};
 
 pub struct Service {
     repository: Repository,
