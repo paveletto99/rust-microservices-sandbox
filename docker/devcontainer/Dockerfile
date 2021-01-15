@@ -5,10 +5,14 @@ RUN apt-get update && \
     apt-get -y dselect-upgrade && \
     apt-get install -y build-essential procps curl git && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    echo "=== Downloading SHA512SUMS" && \
+    curl --proto '=https' --tlsv1.2 -sSf https://musl.cc/SHA512SUMS | grep -E '(aarch64-linux-musl-cross.tgz|x86_64-linux-musl-cross.tgz)' > /tmp/SHA512SUMS && \
     echo "=== Downloading aarch64-linux-musl-cross.tgz" && \
-    curl --proto '=https' --tlsv1.2 -sSf -o /tmp/aarch64-linux-musl-cross.tgz https://more.musl.cc/10/x86_64-linux-musl/aarch64-linux-musl-cross.tgz && \
+    curl --proto '=https' --tlsv1.2 -sSf -o /tmp/aarch64-linux-musl-cross.tgz https://musl.cc/aarch64-linux-musl-cross.tgz && \
     echo "=== Downloading x86_64-linux-musl-cross.tgz" && \
-    curl --proto '=https' --tlsv1.2 -sSf -o /tmp/x86_64-linux-musl-cross.tgz https://more.musl.cc/10/x86_64-linux-musl/x86_64-linux-musl-cross.tgz && \
+    curl --proto '=https' --tlsv1.2 -sSf -o /tmp/x86_64-linux-musl-cross.tgz https://musl.cc/x86_64-linux-musl-cross.tgz && \
+    echo "=== Check SHA512SUMS" && \
+    cd /tmp && sha512sum -c SHA512SUMS && \
     mkdir /opt/musl-toolchains && \
     { { [ -f /tmp/aarch64-linux-musl-cross.tgz ] && tar zxf /tmp/aarch64-linux-musl-cross.tgz -C /opt/musl-toolchains; } || true; } && \
     { { [ -f /tmp/x86_64-linux-musl-cross.tgz ] && tar zxf /tmp/x86_64-linux-musl-cross.tgz -C /opt/musl-toolchains; } || true; } && \
@@ -21,7 +25,7 @@ RUN apt-get update && \
     /tmp/rustup-init.sh -q -y -t aarch64-unknown-linux-musl x86_64-unknown-linux-musl && \
     rm -f /tmp/*.sh
 
-ENV PATH "/root/.cargo/bin:${ARM64_BIN_PATH}:${AMD64_BIN_PATH}:${PATH}"
+ENV PATH "/root/.cargo/bin:${PATH}"
 
 COPY ./cargo-config /root/.cargo/config
 
