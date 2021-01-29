@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 # json_env_logger = "0.1"
 actix-cors = "0.5"
+actix-rt = "1.0.0"
 actix-web = "3"
 actix-web-httpauth = "0.5"
 async-trait = "0.1"
@@ -23,6 +24,11 @@ serde_json = "1.0"
 time = "0.1"
 tokio-postgres = { version = "0.5", features=["with-chrono-0_4"] }
 uuid = { version = "0.8", features = ["serde", "v4"] }
+
+[dev-dependencies]
+reqwest = { version = "0.11", features = ["json"] }
+openssl = "0.10.32"
+openssl-sys = "0.9.60"
 
 [profile.release]
 #opt-level = 'z'
