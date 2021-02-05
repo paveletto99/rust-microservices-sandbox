@@ -24,10 +24,10 @@ impl ApiController for Controller {
 impl Controller {
 
     async fn getCustomerHandler(service: web::Data<CustomerServiceManager>) -> impl Responder {
-        web::Json(User{ name: format!("{} {}", "Call me baby CUSTOMER : ", service.getCustomer().await.to_string()) })
+        web::Json(User{ name: format!("{} {}", "Call CUSTOMER : ", service.getCustomer().await.to_string()) })
     }
 
     async fn getCustomersHandler(_service: web::Data<CustomerServiceManager>) -> impl Responder {
-        web::Json(User{ name: "Call me baby  CUSTOMER : ".to_string() })
+        web::Json(User{ name: "Call CUSTOMER : ".to_string() })
     }
 }

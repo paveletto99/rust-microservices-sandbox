@@ -23,7 +23,7 @@ impl Controller {
         let rows = client.query(&stmt, &[]).await.unwrap();
         let value: String = rows[0].get(0);
         
-        web::Json(User { name: format!("{} {}", "Call me baby : ", value) })
+        web::Json(User { name: format!("{} {}", "Call : ", value) })
     }
 
     async fn getUsersHandler() -> impl Responder {
