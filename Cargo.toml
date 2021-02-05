@@ -21,7 +21,16 @@ env_logger = "0.8"
 futures = "0.3"
 jsonwebtoken = "7.2"
 bytes = "0.6"
+bson = "1"
+# Waiting the next release for UUID PK:
+#   https://github.com/mongodb/bson-rust/issues/174
+#   https://github.com/mongodb/bson-rust/commit/e03e95e05a8f8da4d71f088c5e06c62488ba77ce
+#bson = { git = "https://github.com/mongodb/bson-rust", branch = "master" }
+mongodb = "1"
+chrono = { version = "0.4", features = ["serde"] }
 
+[dev-dependencies]
+actix-rt = "1"
 
 [profile.release]
 #opt-level = 'z'

@@ -4,6 +4,8 @@ export PG_USER=postgres
 export PG_PASS=
 export PG_DBNAME=postgres
 export PG_DSN=postgresql://${PG_USER}:${PG_PASS}@${PG_HOST}:${PG_PORT}/${PG_DBNAME}?connect_timeout=10
+export MONGODB_URI=mongodb://localhost:27017
+export MONGODB_DBNAME="rustmicroservices"
 
 KIND_CREATE_CLUSTER_SCRIPT=$(CURDIR)/kubernetes/kind/kind-create-cluster-with-registry
 KIND_NETWORK_NAME=kind
@@ -15,10 +17,11 @@ KIND_REGISTRY_NAME=kind-registry
 KIND_REGISTRY_PORT=5000
 KIND_KUBERNETES_ADMIN_USER=admin-user
 
+DOCKER_CONTAINER_NAME = rust-container
 DOCKER_IMAGE_NAME = rust-container:latest
 DEV_CONTAINER_IMAGE_NAME = rust-devcontainer:latest
 CURRENT_IMAGE_ID = $(shell docker images -q ${DEV_CONTAINER_IMAGE_NAME})
-DELETE_IMAGE = 
+DELETE_IMAGE_CMD = 
 
 ifneq ($(strip ${CURRENT_IMAGE_ID}),)
 DELETE_IMAGE_CMD = docker rmi ${CURRENT_IMAGE_ID}
@@ -77,7 +80,10 @@ docker-build-image:
 	docker push localhost:5000/${DOCKER_IMAGE_NAME}
 
 docker-start:
-	docker run --rm -d --net=host -e PG_HOST -e PG_PORT -e PG_USER -e PG_PASS -e PG_DBNAME -p 9000:9000 ${DOCKER_IMAGE_NAME}
+	docker run --rm -d --net=host --name ${DOCKER_CONTAINER_NAME} -e PG_HOST -e PG_PORT -e PG_USER -e PG_PASS -e PG_DBNAME -p 9000:9000 ${DOCKER_IMAGE_NAME}
+
+docker-stop:
+	docker stop ${DOCKER_CONTAINER_NAME}
 
 get-cluster-token:
 	kubectl -n kubernetes-dashboard describe secret $$(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $$1}') | grep token: | awk -F 'token:' '{print $$2}' | sed 's/ //g'
@@ -95,3 +101,6 @@ undeploy-kubernetes:
 	kubectl delete -f kubernetes/03-postgresql-configmap.yaml
 	kubectl delete -f kubernetes/02-mongo-configmap.yaml
 	kubectl delete -f kubernetes/01-namespace.yaml
+
+test:
+    cargo test --color=always -- --nocapture
