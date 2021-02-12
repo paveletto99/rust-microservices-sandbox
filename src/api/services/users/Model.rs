@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Default, Serialize, Deserialize, Debug)]
 pub struct User {
     user_id: Option<u32>,
     username: String,
@@ -51,4 +51,6 @@ impl User {
     // pub fn get_created_on(&self) -> String {
     //     self.created_on.unwrap_or_default()
     // }
+
+    // @todo[PG] add https://docs.rs/validator/0.12.0/validator/
 }
