@@ -123,7 +123,6 @@ mod tests {
                 ),
         )
         .await;
-
         let payload =
             r#"{"username":"12345","password":"User name","email":"validate@todo.do"}"#.as_bytes();
 

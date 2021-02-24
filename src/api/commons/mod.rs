@@ -1,3 +1,5 @@
+pub mod Errors;
+
 //use deadpool_postgres::{ManagerConfig, Pool};
 use actix_web::web;
 use async_trait::async_trait;
