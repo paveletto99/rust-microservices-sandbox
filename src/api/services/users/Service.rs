@@ -49,6 +49,7 @@ mod tests {
 
     use super::*;
     use actix_web::{http::header, http::StatusCode, test, web, App};
+    use chrono::DateTime;
     use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
     use tokio_postgres::{Config, NoTls};
 
@@ -73,14 +74,50 @@ mod tests {
         );
         pool
     }
-    #[actix_rt::test]
-    async fn test_add_user() {
-        // mock obj
+
+    fn get_mock_user() -> User {
         let mut user = User::default();
-        user.set_id(2);
-        user.set_username("2".to_string());
-        user.set_email("2".to_string());
-        let url_param_mock = web::Json(user);
+        user.set_id(12345);
+        user.set_username("12345".to_string());
+        user.set_password("12345".to_string());
+        user.set_email("validate@todo.do".to_string());
+        user.set_created_on(chrono::Utc::now());
+        user
+    }
+
+    #[actix_rt::test]
+    async fn delete_user_works() {
+        let user_id = 12345 as u32;
+        let res = Service::New(get_db_pool()).delete_user(user_id).await;
+        match res {
+            Ok(user) => println!("User deleted:\n{:?}", user),
+            Err(err) => panic!("{:?}", err),
+        }
+    }
+
+    #[actix_rt::test]
+    async fn add_user_works() {
+        let url_param_mock = web::Json(get_mock_user());
+        let res = Service::New(get_db_pool()).add_user(url_param_mock).await;
+        match res {
+            Ok(user) => println!("User found:\n{:?}", user),
+            Err(err) => panic!("{:?}", err),
+        }
+    }
+
+    #[actix_rt::test]
+    async fn add_user_duplicated_username_return_error() {
+        let url_param_mock = web::Json(get_mock_user());
+        let res = Service::New(get_db_pool()).add_user(url_param_mock).await;
+
+        match res {
+            Err(err) => panic!("{:?}", err),
+            Ok(user) => println!("User found:\n{:?}", user),
+        }
+    }
+    #[actix_rt::test]
+    async fn add_user_duplicated_email_return_error() {
+        let url_param_mock = web::Json(get_mock_user());
         let res = Service::New(get_db_pool()).add_user(url_param_mock).await;
 
         match res {
@@ -90,13 +127,9 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
-    async fn test_add_user_duplicated_user_name_error() {
-        // mock obj
-        let mut user = User::default();
-        user.set_id(0);
-        let url_param_mock = web::Json(user);
-        let res = Service::New(get_db_pool()).add_user(url_param_mock).await;
+    async fn test_get_user_by_identifier_works() {
+        let user_id = 0 as u32;
+        let res = Service::New(get_db_pool()).get_user(user_id).await;
 
         match res {
             Ok(user) => println!("User found:\n{:?}", user),
@@ -104,39 +137,8 @@ mod tests {
         }
     }
     #[actix_rt::test]
-    #[ignore]
-    async fn test_add_user_duplicated_user_email_error() {
-        // mock obj
-        let mut user = User::default();
-        user.set_id(0);
-        let url_param_mock = web::Json(user);
-        let res = Service::New(get_db_pool()).add_user(url_param_mock).await;
-
-        match res {
-            Ok(user) => println!("User found:\n{:?}", user),
-            Err(err) => panic!("{:?}", err),
-        }
-    }
-
-    #[actix_rt::test]
-    async fn test_get_user_by_identifier() {
-        // mock obj
-        let mut user = User::default();
-        user.set_id(0);
-        let userId = 0 as u32;
-        let res = Service::New(get_db_pool()).get_user(userId).await;
-
-        match res {
-            Ok(user) => println!("User found:\n{:?}", user),
-            Err(err) => panic!("{:?}", err),
-        }
-    }
-    #[actix_rt::test]
-    async fn test_get_user_by_identifier_not_found() {
-        // mock obj
-        let mut user = User::default();
-        user.set_id(152);
-        let userId = 152 as u32;
+    async fn test_get_user_by_identifier_not_found_works() {
+        let userId = 1000 as u32;
         let res = Service::New(get_db_pool()).get_user(userId).await;
 
         match res {

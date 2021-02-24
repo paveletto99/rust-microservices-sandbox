@@ -74,7 +74,7 @@ mod tests {
     use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
     use tokio_postgres::{Config, NoTls};
 
-    fn get_db_pool() -> Pool {
+    pub fn get_db_pool() -> Pool {
         // try to mock db pool
         let mut pg_config: Config = tokio_postgres::Config::new();
         pg_config.host(env::var("PG_HOST").unwrap().as_str());
@@ -96,7 +96,7 @@ mod tests {
         pool
     }
     #[actix_rt::test]
-    async fn test_get_user_by_identifier() {
+    async fn get_user_by_identifier_works() {
         let mut srv = test::init_service(
             App::new()
                 .data(UserServiceManager::New(get_db_pool().clone()))
@@ -104,14 +104,14 @@ mod tests {
         )
         .await;
 
-        let req = test::TestRequest::get().uri("/users/12345").to_request();
+        let req = test::TestRequest::get().uri("/users/0").to_request();
         // Call application
         let resp = test::call_service(&mut srv, req).await;
         assert_eq!(resp.status(), StatusCode::OK);
     }
 
     #[actix_rt::test]
-    async fn test_add_new_user_success() {
+    async fn add_new_user_works() {
         let mut app = test::init_service(
             App::new()
                 .data(UserServiceManager::New(get_db_pool().clone()))
