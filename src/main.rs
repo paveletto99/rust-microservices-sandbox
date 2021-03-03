@@ -9,6 +9,8 @@ use tokio_postgres::{Config, NoTls};
 use uuid::Uuid;
 use mongodb::Client;
 
+use crate::api::clients::PostgresClient::PostgresClient;
+
 // Application Modules
 mod api;
 use api::commons::ApiController;
@@ -34,17 +36,8 @@ async fn main() -> std::io::Result<()> {
     env::set_var("RUST_LOG", "actix_web=debug,actix_server=info");
     env_logger::init();
 
-    // PostgreSQL Environment Config
-    const MAX_POOL_SIZE: usize = 16;
-    let mut pgConfig: Config = tokio_postgres::Config::new();
-    pgConfig.host(env::var("PG_HOST").unwrap().as_str());
-    pgConfig.port(env::var("PG_PORT").unwrap().parse::<u16>().unwrap());
-    pgConfig.user(env::var("PG_USER").unwrap().as_str());
-    pgConfig.password(env::var("PG_PASS").unwrap().as_str());
-    pgConfig.dbname(env::var("PG_DBNAME").unwrap().as_str());
-
     // PostgreSQL Connection Pool
-    let pool = Pool::new(Manager::from_config(pgConfig, NoTls, ManagerConfig{ recycling_method: RecyclingMethod::Fast }), MAX_POOL_SIZE);
+    let pool = PostgresClient::get_default_pool().await.unwrap();
 
     // MongoDB Connection Pool
     let MongoDBURI = env::var("MONGODB_URI").expect("MONGODB_URI not set");

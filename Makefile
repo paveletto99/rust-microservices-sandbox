@@ -101,6 +101,3 @@ undeploy-kubernetes:
 	kubectl delete -f kubernetes/03-postgresql-configmap.yaml
 	kubectl delete -f kubernetes/02-mongo-configmap.yaml
 	kubectl delete -f kubernetes/01-namespace.yaml
-
-test:
-  cargo test --color=always -- --nocapture

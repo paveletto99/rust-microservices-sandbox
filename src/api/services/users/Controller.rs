@@ -67,39 +67,22 @@ impl Controller {
 
 #[cfg(test)]
 mod tests {
-    use std::env;
-
     use super::*;
+    use crate::api::clients::PostgresClient::PostgresClient;
     use actix_web::{http::header, http::StatusCode, test, web, App};
     use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
+    use std::env;
     use tokio_postgres::{Config, NoTls};
 
-    pub fn get_db_pool() -> Pool {
-        // try to mock db pool
-        let mut pg_config: Config = tokio_postgres::Config::new();
-        pg_config.host(env::var("PG_HOST").unwrap().as_str());
-        pg_config.port(env::var("PG_PORT").unwrap().parse::<u16>().unwrap());
-        pg_config.user(env::var("PG_USER").unwrap().as_str());
-        pg_config.password(env::var("PG_PASS").unwrap().as_str());
-        pg_config.dbname(env::var("PG_DBNAME").unwrap().as_str());
-        // PostgreSQL Connection Pool
-        let pool = Pool::new(
-            Manager::from_config(
-                pg_config,
-                NoTls,
-                ManagerConfig {
-                    recycling_method: RecyclingMethod::Fast,
-                },
-            ),
-            16,
-        );
-        pool
+    async fn get_pool() -> Pool {
+        PostgresClient::get_default_pool().await.unwrap()
     }
+
     #[actix_rt::test]
     async fn get_user_by_identifier_works() {
         let mut srv = test::init_service(
             App::new()
-                .data(UserServiceManager::New(get_db_pool().clone()))
+                .data(UserServiceManager::New(get_pool().await.clone()))
                 .service(web::resource("/users/{user_id}").to(Controller::get_user_handler)),
         )
         .await;
@@ -114,12 +97,9 @@ mod tests {
     async fn add_new_user_works() {
         let mut app = test::init_service(
             App::new()
-                .data(UserServiceManager::New(get_db_pool().clone()))
+                .data(UserServiceManager::New(get_pool().await.clone()))
                 .service(
-                    web::resource("/users").route(
-                        web::post()
-                            .to(Controller::add_users_handler),
-                    ),
+                    web::resource("/users").route(web::post().to(Controller::add_users_handler)),
                 ),
         )
         .await;
