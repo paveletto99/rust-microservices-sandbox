@@ -21,7 +21,7 @@ DOCKER_CONTAINER_NAME = rust-container
 DOCKER_IMAGE_NAME = rust-container:latest
 DEV_CONTAINER_IMAGE_NAME = rust-devcontainer:latest
 CURRENT_IMAGE_ID = $(shell docker images -q ${DEV_CONTAINER_IMAGE_NAME})
-DELETE_IMAGE_CMD = 
+DELETE_IMAGE_CMD =
 
 ifneq ($(strip ${CURRENT_IMAGE_ID}),)
 DELETE_IMAGE_CMD = docker rmi ${CURRENT_IMAGE_ID}
@@ -54,9 +54,9 @@ kind-create-cluster:
 	(
 		( kind get clusters | grep -q ${KIND_CLUSTER_NAME} ) && ( echo "Cluster ${KIND_CLUSTER_NAME} already exists" && exit 0; )
 	) || (
-		
+
 		echo "Creating Kubernetes cluster...."
-		
+
 		if [ -f "${KIND_CREATE_CLUSTER_SCRIPT}" ]; then
 			$(KIND_CREATE_CLUSTER_SCRIPT) ${KIND_NETWORK_NAME} ${KIND_CLUSTER_NAME} ${KIND_KUBECONFIG_DIR} ${KIND_KUBECONFIG_FILE} ${KIND_NODE_IMAGE} ${KIND_REGISTRY_NAME} ${KIND_REGISTRY_PORT} ${KIND_KUBERNETES_ADMIN_USER}
 		else
