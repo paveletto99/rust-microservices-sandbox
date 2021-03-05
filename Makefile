@@ -12,7 +12,7 @@ KIND_NETWORK_NAME=kind
 KIND_CLUSTER_NAME=cluster-dev01
 KIND_KUBECONFIG_DIR=${HOME}/.kube
 KIND_KUBECONFIG_FILE=${KIND_KUBECONFIG_DIR}/kind-kubernetes-clusters-${KIND_CLUSTER_NAME}.kubeconfig
-KIND_NODE_IMAGE=kindest/node:v1.20.0@sha256:b40ecf8bcb188f6a0d0f5d406089c48588b75edc112c6f635d26be5de1c89040
+KIND_NODE_IMAGE=kindest/node:v1.20.2@sha256:8f7ea6e7642c0da54f04a7ee10431549c0257315b3a634f6ef2fecaaedb19bab
 KIND_REGISTRY_NAME=kind-registry
 KIND_REGISTRY_PORT=5000
 KIND_KUBERNETES_ADMIN_USER=admin-user
@@ -101,3 +101,6 @@ undeploy-kubernetes:
 	kubectl delete -f kubernetes/03-postgresql-configmap.yaml
 	kubectl delete -f kubernetes/02-mongo-configmap.yaml
 	kubectl delete -f kubernetes/01-namespace.yaml
+
+test:
+	cargo test --color=always -- --nocapture
