@@ -23,7 +23,7 @@ $ make build-devcontainer
 
 ### **Musl libc** static cross toolchains
 
-> The above Docker image suppors Rust and is built from scratch installing the following components:
+> The above Docker image supports Rust and is built from scratch by installing the following components:
 >
 >1. The latest version of **Rust** programming language
 >2. The **Musl** libc toolchains for cross compiling Rust artifacts for **aarch64** and **x86_64** architectures
@@ -44,10 +44,10 @@ $ make amd64-release
 >
 >> **target/x86_64-unknown-linux-musl/release/<EXECUTABLE_NAME>**
 >
-> The executables are **optimized** and **statically linked** and can be used for building **distroless** Docker images
+> The executables are **optimized** and **statically linked** and can be used for building **distroless** Docker images in order to deploy Microservices.
 
 
-### kind - How to run Kubernetes in Docker for developement pourpose
+### kind - How to run Kubernetes in Docker for developement purpose
 
 > Prerequisites: download the following executables and put them where you prefer in the **PATH**
 >
@@ -72,7 +72,7 @@ $ ls ~/.kube/kind-kubernetes-clusters-${CLUSTER_NAME}.kubeconfig
 >
 >With **kind** you can create as many **Kubernetes Clusters** you want also outside this project and of different type like **Multi-node clusters** (***one control-plane*** and ***many worker node***) or **Control-plane HA** (***multiple control-plane in HA*** and ***many worker node*** )
 >
->You can use above configurazion file for storing in one separate place the configurations of all **Kubernetes Clusters** created and managed with **kind**
+>You can use above configuration file for storing in different separate places the configurations of all **Kubernetes Clusters** created and managed with **kind**
 >
 >
 >The path to this configuration file must be exported into an environment variable to be able to interact with the **Kubernetes Clusters**
@@ -96,25 +96,27 @@ $ kubectl get pods -A
 $ kubectl get pods --context kind-<CLUSTER_NAME> -A
 ```
 >
->If you prefer, when you create a **kind Kubernetes Cluster** you can specify a separate **KUBECONFIG** configuration file for all of them and then export the specific path to the configuration file of the cluster you want interact with
+>If you prefer, when you create a **kind Kubernetes Cluster** you can specify a separate **KUBECONFIG** configuration file for all of them.
+>
+>Export the specific path to the configuration file of the cluster you want interact with
 >
 
 ```bash
 export CLUSTER_NAME=cluster-dev01
-kind create cluster --kubeconfig ~/.kube/kind-kubernetes-clusters-${CLUSTER_NAME}.kubeconfig --image="kindest/node:v1.20.0@sha256:b40ecf8bcb188f6a0d0f5d406089c48588b75edc112c6f635d26be5de1c89040" --name="${CLUSTER_NAME}"
+kind create cluster --kubeconfig ~/.kube/kind-kubernetes-clusters-${CLUSTER_NAME}.kubeconfig --image="kindest/node:v1.20.2@sha256:8f7ea6e7642c0da54f04a7ee10431549c0257315b3a634f6ef2fecaaedb19bab" --name="${CLUSTER_NAME}"
 ```
 
->Then you can use the specific configuration file
+>You can use a specific configuration file
 
 ```bash
 $ export KUBECONFIG=~/.kube/kind-kubernetes-clusters-cluster-dev01.kubeconfig
 ```
 
-## Installing the Dashboard UI
+## Installing the Kubernetes Dashboard UI (Optional)
 >
 >NOTE: **The some of the following setup commands are used at Kubernetes Cluster creation time**
 >
->Reported here for a detailed explaination
+>Reported here for a detailed explaination already defined in the **make kind-create-cluster** target
 >
 
 ```bash
@@ -148,31 +150,35 @@ subjects:
 EOF
 ```
 
+### Kubernetes Cluster interaction
+
+>
 >Check the **ClusterRoleBinding** exists
+>
 
 ```bash
 $ kubectl get clusterrolebindings -A | grep cluster-admin
 ```
 
->Getting a Bearer Token for the Dashboard login
+>Getting a Bearer Token for the UI dashboard login for the **admin-user**
 
 ```bash
 $ kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}') | grep token: | awk -F 'token:' '{print $2}' | sed 's/ //g'
 ```
 
->After exporting the environment variable **KUBECONFIG** you can also use the following command to get a token for accessing the UI Dashboard
+>After exporting the environment variable **KUBECONFIG** you can also use the following useful command to get a token for accessing the UI Dashboard
 
 ```bash
 $ make get-cluster-token
 ```
 
->Use the default token
+>Or get the default token
 
 ```bash
 $ kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep default-token | awk '{print $1}') | grep token: | awk -F 'token:' '{print $2}' | sed 's/ //g'
 ```
 
->Start the proxy
+>Start the proxy for accessing the UI dashboard
 
 ```bash
 $ kubectl proxy
@@ -262,11 +268,13 @@ $ kubectl describe svc svc-rust-microservices-sandbox -n dev
 $ kubectl get ep svc-rust-microservices-sandbox -n dev
 ```
 
+### Kind PROs
+
 >
 >The main advantages of using **kind** are:
 >
-> 1. It's possible clean up all with simple commands
-> 2. Kubernetes Clusters running on a docker container share the resources with the host machine; this differs from how **minikube** works as it requires a VM with preallocated resources
+> 1. It's possible clean up all with a simple command
+> 2. Kubernetes Clusters running on a docker container that shares the resources with the host machine; this differs from how **minikube** works as it requires a VM with preallocated resources
 >
 
 ## The Rust application
@@ -277,7 +285,7 @@ $ kubectl get ep svc-rust-microservices-sandbox -n dev
 $ cargo init RustMicroservicesSandbox
 ```
 
-> For initilaizing Rust projects in Devcontainer (Ctrl + Shift + P) you must use the following commad instead
+> For initilaizing Rust projects in Devcontainer (Ctrl + Shift + P or equivalent one) you must use the following commad instead
 
 ```bash
 $ export USER=root && cargo init RustMicroservicesSandbox
@@ -293,7 +301,7 @@ $ export USER=root && cargo init RustMicroservicesSandbox
 $ cargo update
 ```
 
->The web application structure aims to apply the ***Separation of Concerns*** (SoC) principle of Software Design
+>The web application structure aims to apply the ***Separation of Concerns*** (SoC) principle of Software Design.
 >
 >From this principle derive the **S**ingle Responsibility and the **I**nterface Segregation principles of the **S.O.L.I.D.** Design.
 >
@@ -335,11 +343,18 @@ src/api/services/
 └── mod.rs
 ```
 
->This will allow application enhancements only by loading or unloading features modules and mounting or umounting features routes in the **main.rs**
+>This will allow application modularity by loading or unloading features modules and mounting or umounting features routes in the **main.rs**
 
-## Recomended VSCode extensions
+## IDEs
+
+### IntelliJ IDEA Rust plugin
+
+> IntelliJ Rust <https://www.jetbrains.com/rust/>
+
+### Recomended VSCode extensions
 
 > 1. Rust analyzer <https://rust-analyzer.github.io>
+> 2. Rust support for Visual Studio Code <https://github.com/rust-lang/vscode-rust>
 
 ## Useful links
 
