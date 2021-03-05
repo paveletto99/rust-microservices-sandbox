@@ -99,10 +99,10 @@ async fn main() -> std::io::Result<()> {
                                 .configure(OrderController::setUpService),
                         )
                         .service(
-                            // Mount OrderServiceManager
+                            // Mount UserServiceManager
                             web::scope("/users")
                                 .data(UserServiceManager::New(pool.clone()))
-                                .configure(UserController::set_up_service),
+                                .configure(UserController::setUpService),
                         )
                         .service( // Mount ShippingServiceManager
                             web::scope("/shippings")

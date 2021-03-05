@@ -1,22 +1,31 @@
+use async_trait::async_trait;
+use crate::api::commons::ApiController;
 use super::UserServiceManager;
 use crate::api::services::users::Model::User;
 use actix_web::{web, HttpResponse, Responder};
 
 pub struct Controller;
 
-impl Controller {
-    pub fn set_up_service(service_cfg: &mut web::ServiceConfig) {
-        service_cfg.service(
+#[async_trait]
+impl ApiController for Controller {
+
+    fn setUpService(serviceCfg: &mut web::ServiceConfig ) {
+
+        serviceCfg.service(
             web::resource("/{user_id}")
                 .route(web::delete().to(Self::delete_user_handler))
                 .route(web::get().to(Self::get_user_handler)),
         );
-        service_cfg.service(
+
+        serviceCfg.service(
             web::resource("/")
                 .route(web::patch().to(Self::update_users_handler))
                 .route(web::post().to(Self::add_users_handler)),
         );
     }
+}
+
+impl Controller {
 
     async fn get_user_handler(
         service: web::Data<UserServiceManager>,
