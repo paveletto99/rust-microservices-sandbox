@@ -56,14 +56,16 @@ $ make amd64-release
 >
 > For both see **"Install and Set Up kubectl"** and **"kind - Quick Start"** links at the end of this document
 >
-> With the following make target will be created a **Kubernetes Cluster** as a Docker container
+> The following make target will create a **Kubernetes Cluster** in a Docker container
+>
+> A local Docker Registry will be set up too
 >
 
 ```bash
 $ make kind-create-cluster
 ```
 >
->The cluster will be created with a separate configuration file located here:
+>The cluster configuration will be saved in the file located here:
 >
 
 ```bash
@@ -96,9 +98,7 @@ $ kubectl get pods -A
 $ kubectl get pods --context kind-<CLUSTER_NAME> -A
 ```
 >
->If you prefer, when you create a **kind Kubernetes Cluster** you can specify a separate **KUBECONFIG** configuration file for all of them.
->
->Export the specific path to the configuration file of the cluster you want interact with
+>If you prefer, when you create a **kind Kubernetes Cluster** you can specify a separate **KUBECONFIG** configuration file for all of them based on the cluster name.
 >
 
 ```bash
@@ -106,7 +106,9 @@ export CLUSTER_NAME=cluster-dev01
 kind create cluster --kubeconfig ~/.kube/kind-kubernetes-clusters-${CLUSTER_NAME}.kubeconfig --image="kindest/node:v1.20.2@sha256:8f7ea6e7642c0da54f04a7ee10431549c0257315b3a634f6ef2fecaaedb19bab" --name="${CLUSTER_NAME}"
 ```
 
->You can use a specific configuration file
+>
+>Export the path to the configuration file of the cluster you want to use
+>
 
 ```bash
 $ export KUBECONFIG=~/.kube/kind-kubernetes-clusters-cluster-dev01.kubeconfig
@@ -114,9 +116,11 @@ $ export KUBECONFIG=~/.kube/kind-kubernetes-clusters-cluster-dev01.kubeconfig
 
 ## Installing the Kubernetes Dashboard UI (Optional)
 >
->NOTE: **The some of the following setup commands are used at Kubernetes Cluster creation time**
+>NOTE: **Some of the following setup commands are used at Kubernetes Cluster creation time**
 >
->Reported here for a detailed explaination already defined in the **make kind-create-cluster** target
+>Reported here for a detailed explaination
+>
+>They are already defined in the set up script used by the **make kind-create-cluster** target
 >
 
 ```bash
@@ -187,7 +191,17 @@ $ kubectl proxy
 >Open the brower pointing to the following link
 >
 ><http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/>
+>
+>
 
+### Build Docker image and deploy the application
+
+>
+>Buil the image and publish to the local registry
+
+```bash
+$ make docker-build-image
+```
 >
 >Create a **dev** namespace and check that it's correctly created
 >
@@ -224,6 +238,12 @@ $ make deploy-kubernetes
 $ make undeploy-kubernetes
 ```
 
+>
+>Open the brower pointing to the following link to access the application and check if it works
+>
+>https://localhost/www/index.html
+>
+
 >For removing a cluster simply run
 
 ```bash
@@ -235,6 +255,61 @@ $ kind delete cluster --name <CLUSTER_NAME>
 ```bash
 $ make kind-delete-cluster
 ```
+
+## Troubleshooting NGINX Ingress Controller
+
+### Find the deployment
+
+```bash
+$ kubectl get namespaces
+$ kubectl get deployments -n ingress-nginx
+$ kubectl get pods -n ingress-nginx
+```
+
+### Customization
+
+>
+>The value for **use-proxy-protocol** needs to be false if you do not use haproxy, elb or similar reverse proxies in front.
+>
+>https://github.com/kubernetes-sigs/kind/issues/1618
+>
+
+```bash
+$ kubectl edit configmaps -n ingress-nginx ingress-nginx-controller
+```
+
+```yaml
+apiVersion: v1
+data:
+  proxy_protocol: "off"
+  use-proxy-protocol: "false"
+```
+
+### Restart the deployments
+
+```bash
+$ kubectl rollout restart -n ingress-nginx deployments/ingress-nginx-controller
+```
+>
+> or
+>
+
+```bash
+$ kubectl scale deployment -n ingress-nginx ingress-nginx-controller --replicas=0
+
+$ kubectl scale deployment -n ingress-nginx ingress-nginx-controller --replicas=1
+
+$ kubectl scale deployment -n dev rust-microservices-sandbox-deployment --replicas=0
+
+$ kubectl scale deployment -n dev rust-microservices-sandbox-deployment --replicas=1
+```
+
+### Check what is going on
+
+```bash
+$ kubectl logs -f -n dev rust-microservices-sandbox-deployment-b4f99b546-74ccx rust-service
+```
+
 
 ## Misc useful commands
 
