@@ -19,22 +19,22 @@ impl Controller {
     }
 
     async fn getInvoiceHandler(service: web::Data<InvoiceServiceManager>) -> impl Responder {
-        web::Json(Invoice{ customerId: "".to_string(), code: format!("{} {}", "Call INVOICE : ", service.getInvoice().await.to_string()) })
+        web::Json(Invoice{ customerId: "".to_string(), code: format!("{}", service.getInvoice().await.to_string()) })
     }
 
     async fn getInvoicesHandler() -> impl Responder {
-        web::Json(Invoice{ customerId: "".to_string(), code: "Call INVOICE : ".to_owned() })
+        web::Json(Invoice{ customerId: "".to_string(), code: "".to_owned() })
     }
 
     async fn createInvoiceHandler(service: web::Data<InvoiceServiceManager>) -> impl Responder {
-        web::Json(Invoice{ customerId: "".to_string(), code: format!("{} {}", "Call INVOICE : ", service.getInvoice().await.to_string()) })
+        web::Json(Invoice{ customerId: "".to_string(), code: format!("{}", service.getInvoice().await.to_string()) })
     }
 
     async fn updateInvoiceHandler(service: web::Data<InvoiceServiceManager>) -> impl Responder {
-        web::Json(Invoice{ customerId: "".to_string(), code: format!("{} {}", "Call INVOICE : ", service.getInvoice().await.to_string()) })
+        web::Json(Invoice{ customerId: "".to_string(), code: format!("{}", service.getInvoice().await.to_string()) })
     }
 
     async fn deleteInvoiceHandler(service: web::Data<InvoiceServiceManager>) -> impl Responder {
-        web::Json(Invoice{ customerId: "".to_string(), code: format!("{} {}", "Call INVOICE : ", service.getInvoice().await.to_string()) })
+        web::Json(Invoice{ customerId: "".to_string(), code: format!("{}", service.getInvoice().await.to_string()) })
     }
 }

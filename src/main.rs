@@ -3,6 +3,7 @@
 #![allow(unused)]
 
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
+use actix_files::Files;
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
 use std::env;
 use tokio_postgres::{Config, NoTls};
@@ -69,7 +70,7 @@ async fn main() -> std::io::Result<()> {
             )
             .wrap(middleware::Logger::default())
             // Liveness probe | Readiness probe
-             .route("/healthz", web::get().to(|| HttpResponse::Ok().finish()))
+            .route("/healthz", web::get().to(|| HttpResponse::Ok().finish()))
             .service(
                 web::scope("/api").service(
                     web::scope("/v1")
@@ -79,27 +80,22 @@ async fn main() -> std::io::Result<()> {
                             format!("{}{}", "Bearer ", Uuid::new_v4().to_simple()),
                         )) // Example setting response Headers e.g: JWT Token
                         .data(pool.clone()) // Passing PostgreSQL Connection Pooler to the Extractor
-                        // .configure(UserController::set_up_service) // Mount routes
-                        .service(
-                            // Mount CustomerServiceManager
+                        .service( // Mount CustomerServiceManager
                             web::scope("/customers")
                                 .data(CustomerServiceManager::New(pool.clone())) // Passing Service Manager Instance to the Extractor
                                 .configure(CustomerController::setUpService), // Mount routes
                         )
-                        .service(
-                            // Mount InvoiceServiceManager
+                        .service( // Mount InvoiceServiceManager
                             web::scope("/invoices")
                                 .data(InvoiceServiceManager::New(pool.clone()))
                                 .configure(InvoiceController::setUpService),
                         )
-                        .service(
-                            // Mount OrderServiceManager
+                        .service( // Mount OrderServiceManager
                             web::scope("/orders")
                                 .data(OrderServiceManager::New(pool.clone()))
                                 .configure(OrderController::setUpService),
                         )
-                        .service(
-                            // Mount UserServiceManager
+                        .service( // Mount UserServiceManager
                             web::scope("/users")
                                 .data(UserServiceManager::New(pool.clone()))
                                 .configure(UserController::setUpService),
@@ -114,13 +110,10 @@ async fn main() -> std::io::Result<()> {
                         ),
                 ),
             )
+            .service(Files::new("/www", "www").prefer_utf8(true).index_file("index.www")) // Static resources
             .default_service(web::route().to(|| HttpResponse::NotFound())) // Default route
     })
-    .bind(format!(
-        "{}{}",
-        "0.0.0.0:",
-        env::var("HTTP_PORT").unwrap_or("9000".to_string())
-    ))?
+    .bind(format!("0.0.0.0:{}", env::var("HTTP_PORT").unwrap_or("9000".to_string())))?
     .run()
     .await
 }

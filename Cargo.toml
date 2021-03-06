@@ -26,6 +26,7 @@ serde_json = "1.0"
 time = "0.1"
 tokio-postgres = { version = "0.5", features=["with-chrono-0_4"] }
 uuid = { version = "0.8", features = ["serde", "v4"] }
+actix-files = "0.5"
 
 [dev-dependencies]
 actix-rt = "1"
