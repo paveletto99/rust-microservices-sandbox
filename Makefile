@@ -27,8 +27,7 @@ ifneq ($(strip ${CURRENT_IMAGE_ID}),)
 DELETE_IMAGE_CMD = docker rmi ${CURRENT_IMAGE_ID}
 endif
 
-#BUILD_IN_CONTAINER_CMD = docker run --rm --user "$(id -u)":"$(id -g)" -v ${PWD}:/usr/src/build -w /usr/src/build $(DEV_CONTAINER_IMAGE_NAME) bash -c 'CC=$(CC) cargo build --release --target ${TARGET}'
-BUILD_IN_CONTAINER_CMD = docker run --rm -v ${PWD}:/usr/src/build -w /usr/src/build $(DEV_CONTAINER_IMAGE_NAME) bash -c 'CC=$(CC) cargo build --release --target ${TARGET}'
+BUILD_IN_CONTAINER_CMD = docker run --rm --user "$$(id -u)":"$$(id -g)" -v ${PWD}:/usr/src/build -w /usr/src/build $(DEV_CONTAINER_IMAGE_NAME) bash -c 'CC=$(CC) cargo build --release --target ${TARGET}'
 
 export KUBECONFIG=${KIND_KUBECONFIG_FILE}
 
@@ -75,6 +74,8 @@ start:
 	target/x86_64-unknown-linux-musl/release/RustMicroservicesSandbox
 
 docker-build-image:
+	docker rmi localhost:5000/${DOCKER_IMAGE_NAME}
+	docker rmi ${DOCKER_IMAGE_NAME}
 	docker build --pull -t ${DOCKER_IMAGE_NAME} -f ./docker/images/Dockerfile .
 	docker tag ${DOCKER_IMAGE_NAME} localhost:5000/${DOCKER_IMAGE_NAME}
 	docker push localhost:5000/${DOCKER_IMAGE_NAME}

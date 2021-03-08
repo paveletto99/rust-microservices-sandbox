@@ -1,3 +1,6 @@
+[build]
+target = "x86_64-unknown-linux-musl"
+
 [target.aarch64-unknown-linux-musl]
 linker = "/opt/musl-toolchains/aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc"
 rustflags = [ "-C", "target-feature=+crt-static", "-C", "link-arg=-lgcc", "-C", "link_arg=-s", "-C", "link_arg=-w" ]
