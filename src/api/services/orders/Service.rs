@@ -2,7 +2,7 @@ use std::io::Error;
 use deadpool_postgres::Pool;
 use super::Model::Order;
 use super::Repository::Repository;
-use crate::api::commons::getUUID;
+use uuid::Uuid;
 
 pub struct Service {
     repository: Repository
@@ -14,7 +14,13 @@ impl Service {
         Self { repository: Repository::New(pgPool) }
     }
 
-    pub async fn getOrder( &self ) -> Result<Order, Error> {
-        Ok(self.repository.getOrder(getUUID()).await?)
+    // TODO: Put here business logic and validations
+    pub async fn getOrder( &self, orderId: Uuid ) -> Result<Order, Error> {
+        Ok(self.repository.getOrder(orderId).await?)
+    }
+
+    // TODO: Put here business logic and validations
+    pub async fn getOrders( &self ) -> Result<Vec<Order>, Error> {
+        Ok(self.repository.getOrders().await?)
     }
 }

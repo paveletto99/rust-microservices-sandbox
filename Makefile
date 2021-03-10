@@ -1,5 +1,5 @@
 export PG_HOST=127.0.0.1
-export PG_PORT=5433
+export PG_PORT=5432
 export PG_USER=postgres
 export PG_PASS=
 export PG_DBNAME=postgres

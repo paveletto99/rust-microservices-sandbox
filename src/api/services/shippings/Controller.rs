@@ -8,7 +8,9 @@ pub struct Controller {}
 impl ApiController for Controller {
     
     fn setUpService(serviceCfg: &mut web::ServiceConfig ) {
-        
+
+        serviceCfg.service(web::resource("").route(web::get().to(Self::getShippingsHandler)));
+
         serviceCfg.service(
             web::resource("/{uuid}")
                 .route(web::get().to(Self::getShippingHandler))
@@ -27,31 +29,35 @@ impl ApiController for Controller {
 
 impl Controller {
 
-    async fn getShippingHandler(service: web::Data<ShippingServiceManager>, shipping: web::Json<ShippingResource>) -> impl Responder {
-        match service.getShipping(&shipping).await {
+    async fn getShippingHandler(service: web::Data<ShippingServiceManager>, shippingId: web::Path<String>) -> impl Responder {
+        match service.getShipping(&shippingId).await {
             Ok(shipping) => HttpResponse::Ok().json(shipping),
-            Err(_err) => HttpResponse::NotFound().finish()
+            Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+            //_ => HttpResponse::NotFound().finish()
         }
     }
 
     async fn getShippingsHandler(service: web::Data<ShippingServiceManager>) -> impl Responder {
         match service.getShippings().await {
             Ok(shippings) => HttpResponse::Ok().json(shippings),
-            Err(_err) => HttpResponse::InternalServerError().finish()
+            Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+            //_ => HttpResponse::NotFound().finish()
         }
     }
     
     async fn createShippingHandler(service: web::Data<ShippingServiceManager>, shipping: web::Json<ShippingResource>) -> impl Responder {
         match service.createShipping(&shipping).await {
             Ok(shipping) => HttpResponse::Ok().json(shipping),
-            Err(_err) => HttpResponse::InternalServerError().finish()
+            Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+            //_ => HttpResponse::NotFound().finish()
         }
     }
 
     async fn deleteShippingHandler(service: web::Data<ShippingServiceManager>, shipping: web::Json<ShippingResource>) -> impl Responder {
         match service.deleteShipping(&shipping).await {
             Ok(shipping) => HttpResponse::Ok().json(shipping),
-            Err(_err) => HttpResponse::InternalServerError().finish()
+            Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+            //_ => HttpResponse::NotFound().finish()
         }
     }
 
@@ -59,7 +65,8 @@ impl Controller {
         //HttpResponse::BadRequest()
         match service.updateShipping(&shipping).await {
             Ok(shipping) => HttpResponse::Ok().json(shipping),
-            Err(_err) => HttpResponse::InternalServerError().finish()
+            Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+            //_ => HttpResponse::NotFound().finish()
         }
     }
 }

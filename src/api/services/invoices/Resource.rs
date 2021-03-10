@@ -1,7 +1,11 @@
-use serde::{Serialize};
+use serde::{Serialize, Deserialize};
+use uuid::Uuid;
+use chrono::{DateTime, Utc};
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct Invoice {
-    pub customerId: String,
-    pub code: String
+    id: Uuid,
+    code: String,
+    customerId: Uuid,
+    createdOn: Option<DateTime<Utc>>
 }

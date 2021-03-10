@@ -25,9 +25,9 @@ impl Service {
         Ok(model)
     }
 
-    pub async fn getShipping( &self, resource: &ShippingResource ) -> Result<Shipping, ApplicationError> {
+    pub async fn getShipping( &self, shippingId: &String ) -> Result<Shipping, ApplicationError> {
         let mut model = Shipping::New();
-        model.setShippingId(Some(ObjectId::with_string(resource.getShippingId().as_str())?));
+        model.setShippingId(Some(ObjectId::with_string(shippingId)?));
 
         Ok(self.repository.getShipping(model).await?)
     }
@@ -69,17 +69,12 @@ mod tests {
     use chrono::Utc;
     use mongodb::Database;
 
-    //const MONGO_DBURI: String  = env::var("MONGODB_URI").expect("MONGODB_URI not set");
-    //const MONGO_DBDATABASE_NAME: String = env::var("MONGODB_DBNAME").expect("MONGODB_DBNAME not set");
-
     #[actix_rt::test]
     async fn test_add_new_document_success() {
-
-        let MONGO_DBURI: String  = env::var("MONGODB_URI").expect("MONGODB_URI not set");
+        // TODO: Move to helper
+        let MONGO_DBURI: String = env::var("MONGODB_URI").expect("MONGODB_URI not set");
         let MONGO_DBDATABASE_NAME: String = env::var("MONGODB_DBNAME").expect("MONGODB_DBNAME not set");
-
         let mongodbConnectionResult = MongoDBClient::getMongoDBClientPool(&MONGO_DBURI, &MONGO_DBDATABASE_NAME).await;
-
         let mongodb: Database;
 
         match mongodbConnectionResult {
@@ -102,12 +97,10 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_get_document_by_id() {
-
-        let MONGO_DBURI: String  = env::var("MONGODB_URI").expect("MONGODB_URI not set");
+        // TODO: Move to helper
+        let MONGO_DBURI: String = env::var("MONGODB_URI").expect("MONGODB_URI not set");
         let MONGO_DBDATABASE_NAME: String = env::var("MONGODB_DBNAME").expect("MONGODB_DBNAME not set");
-
         let mongodbConnectionResult = MongoDBClient::getMongoDBClientPool(&MONGO_DBURI, &MONGO_DBDATABASE_NAME).await;
-
         let mongodb: Database;
 
         match mongodbConnectionResult {
@@ -118,7 +111,7 @@ mod tests {
         let mut shipping= ShippingResource::New();
         shipping.setShippingId("601b987800fdf50800d90c2a".to_string());
 
-        let result = Service::New(mongodb).getShipping(&shipping).await;
+        let result = Service::New(mongodb).getShipping(&shipping.getShippingId()).await;
 
         match result {
             Ok(shipping) => println!("Shipping found:\n{:?}", shipping),
@@ -128,12 +121,10 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_delete_document() {
-
-        let MONGO_DBURI: String  = env::var("MONGODB_URI").expect("MONGODB_URI not set");
+        // TODO: Move to helper
+        let MONGO_DBURI: String = env::var("MONGODB_URI").expect("MONGODB_URI not set");
         let MONGO_DBDATABASE_NAME: String = env::var("MONGODB_DBNAME").expect("MONGODB_DBNAME not set");
-
         let mongodbConnectionResult = MongoDBClient::getMongoDBClientPool(&MONGO_DBURI, &MONGO_DBDATABASE_NAME).await;
-
         let mongodb: Database;
 
         match mongodbConnectionResult {
@@ -155,12 +146,10 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_update_document() {
-
-        let MONGO_DBURI: String  = env::var("MONGODB_URI").expect("MONGODB_URI not set");
+        // TODO: Move to helper
+        let MONGO_DBURI: String = env::var("MONGODB_URI").expect("MONGODB_URI not set");
         let MONGO_DBDATABASE_NAME: String = env::var("MONGODB_DBNAME").expect("MONGODB_DBNAME not set");
-
         let mongodbConnectionResult = MongoDBClient::getMongoDBClientPool(&MONGO_DBURI, &MONGO_DBDATABASE_NAME).await;
-
         let mongodb: Database;
 
         match mongodbConnectionResult {

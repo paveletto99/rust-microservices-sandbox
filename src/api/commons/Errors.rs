@@ -13,12 +13,13 @@ pub enum ApplicationError {
     BsonSerializationError,
     BsonDeserializationError,
     EntityNotFound,
-    UserError(String)
+    UserError(String),
+    UuidError
 }
 
 impl std::fmt::Display for ApplicationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result{
-        write!(f, "Test")
+        write!(f, "Application error")
     }
 }
 
@@ -64,6 +65,12 @@ impl From<bson::de::Error> for ApplicationError {
     }
 }
 
+impl From<uuid::Error> for ApplicationError {
+    fn from(_: uuid::Error) -> ApplicationError {
+        ApplicationError::UuidError
+    }
+}
+
 /*
 impl From<diesel::result::Error> for ApplicationError {
     fn from(err: diesel::result::Error) -> ApplicationError {
@@ -101,7 +108,8 @@ impl actix_web::error::ResponseError for ApplicationError {
             ApplicationError::BsonDeserializationError => msg = "Document deserialization Error",
             ApplicationError::EnvironmentError => msg = "Environment Error.",
             ApplicationError::EntityNotFound => msg = "Entity Not Found", // To be implemented...: HttpResponse::NotFound().json(data),
-            ApplicationError::UserError(data) => msg = data.as_str()
+            ApplicationError::UserError(data) => msg = data.as_str(),
+            ApplicationError::UuidError => msg = "failed to parse Uuid data type"
         }
 
         HttpResponse::InternalServerError().json(msg)

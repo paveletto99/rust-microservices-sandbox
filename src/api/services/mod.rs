@@ -1,5 +1,6 @@
 pub mod users;
 pub mod customers;
-pub mod invoices;
+pub mod products;
 pub mod orders;
+pub mod invoices;
 pub mod shippings;

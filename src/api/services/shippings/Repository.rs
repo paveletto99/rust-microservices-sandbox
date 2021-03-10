@@ -2,8 +2,6 @@ use mongodb::{Database, Collection};
 use bson::{Document, doc};
 use crate::api::commons::Errors::ApplicationError;
 use super::Model::Shipping;
-use std::borrow::Borrow;
-use futures::{TryStreamExt, TryFutureExt};
 
 pub struct Repository {
     MongoDB: Database

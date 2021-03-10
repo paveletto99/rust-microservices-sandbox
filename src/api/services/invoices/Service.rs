@@ -1,7 +1,9 @@
+use std::io::Error;
 use deadpool_postgres::Pool;
-use crate::api::services::invoices::Resource::Invoice as ResourceInvoice;
-use crate::api::services::invoices::Model::Invoice as EntityInvoice;
-use crate::api::services::invoices::Repository::Repository;
+use super::Resource::Invoice as ResourceInvoice;
+use super::Model::Invoice;
+use super::Repository::Repository;
+use uuid::Uuid;
 
 pub struct Service {
     repository: Repository
@@ -13,15 +15,22 @@ impl Service {
         Self { repository: Repository::New(pgPool) }
     }
 
-    pub async fn getInvoice( &self ) -> String {
-        self.repository.getInvoice().await.to_string()
+    // TODO: Put here business logic and validations
+    pub async fn getInvoice( &self, invoiceId: Uuid ) -> Result<Invoice, Error> {
+        Ok(self.repository.getInvoice(invoiceId).await?)
     }
 
-    pub async fn saveInvoice( &self, invoice: ResourceInvoice ) {
+    // TODO: Put here business logic and validations
+    pub async fn getInvoices( &self ) -> Result<Vec<Invoice>, Error> {
+        Ok(self.repository.getInvoices().await?)
+    }
+
+    // TODO: To be implemented - Put here business logic and validations
+    pub async fn saveInvoice( &self, _invoice: ResourceInvoice ) {
         
-        let mut invoice = EntityInvoice::default();
-        invoice.setCustomerId("a88da591-659a-64da-d0bc-9d4c160a071f".to_string());
+        let mut invoice = Invoice::default();
         invoice.setCode("a88da591-659a-64da-d0bc-9d4c160a071f".to_string());
+        invoice.setCustomerId(Uuid::parse_str("a88da591-659a-64da-d0bc-9d4c160a071f".to_string().as_str()).unwrap());
 
         //self.repository.saveInvoice(invoice)
     }

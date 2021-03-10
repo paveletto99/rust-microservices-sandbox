@@ -34,7 +34,7 @@ impl PostgresClient {
     ) -> Result<Pool, Error> {
         // PostgreSQL Environment Config
         let mut pg_config: Config = Config::new();
-        if let Some(x) = app_name {
+        if let Some(_x) = app_name {
             pg_config.application_name(&app_name.unwrap());
         }
         pg_config.dbname(&db_name);

@@ -4,9 +4,7 @@
 
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 use actix_files::Files;
-use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
 use std::env;
-use tokio_postgres::{Config, NoTls};
 use uuid::Uuid;
 use mongodb::Client;
 
@@ -15,21 +13,24 @@ use crate::api::clients::PostgresClient::PostgresClient;
 // Application Modules
 mod api;
 use api::commons::ApiController;
-// Users API
-use api::services::users::UserController;
-use api::services::users::UserServiceManager;
 // Customers API
 use api::services::customers::CustomerController;
 use api::services::customers::CustomerServiceManager;
-// Invoices API
-use api::services::invoices::InvoiceController;
-use api::services::invoices::InvoiceServiceManager;
+// Products API
+use api::services::products::ProductController;
+use api::services::products::ProductServiceManager;
 // Orders API
 use api::services::orders::OrderController;
 use api::services::orders::OrderServiceManager;
+// Invoices API
+use api::services::invoices::InvoiceController;
+use api::services::invoices::InvoiceServiceManager;
 // Shippings API
 use api::services::shippings::ShippingController;
 use api::services::shippings::ShippingServiceManager;
+// Users API
+use api::services::users::UserController;
+use api::services::users::UserServiceManager;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -72,7 +73,8 @@ async fn main() -> std::io::Result<()> {
             // Liveness probe | Readiness probe
             .route("/healthz", web::get().to(|| HttpResponse::Ok().finish()))
             .service(
-                web::scope("/api").service(
+                web::scope("/api")
+                    .service(
                     web::scope("/v1")
                         .data(web::JsonConfig::default().limit(2048))
                         .wrap(middleware::DefaultHeaders::new().header(
@@ -85,25 +87,30 @@ async fn main() -> std::io::Result<()> {
                                 .data(CustomerServiceManager::New(pool.clone())) // Passing Service Manager Instance to the Extractor
                                 .configure(CustomerController::setUpService), // Mount routes
                         )
+                        .service( // Mount ProductServiceManager
+                                  web::scope("/products")
+                                      .data(ProductServiceManager::New(MongoDB.clone()))
+                                      .configure(ProductController::setUpService),
+                        )
+                        .service( // Mount OrderServiceManager
+                                  web::scope("/orders")
+                                      .data(OrderServiceManager::New(pool.clone()))
+                                      .configure(OrderController::setUpService),
+                        )
                         .service( // Mount InvoiceServiceManager
                             web::scope("/invoices")
                                 .data(InvoiceServiceManager::New(pool.clone()))
                                 .configure(InvoiceController::setUpService),
                         )
-                        .service( // Mount OrderServiceManager
-                            web::scope("/orders")
-                                .data(OrderServiceManager::New(pool.clone()))
-                                .configure(OrderController::setUpService),
+                        .service( // Mount ShippingServiceManager
+                                  web::scope("/shippings")
+                                      .data(ShippingServiceManager::New(MongoDB.clone()))
+                                      .configure(ShippingController::setUpService)
                         )
                         .service( // Mount UserServiceManager
                             web::scope("/users")
                                 .data(UserServiceManager::New(pool.clone()))
                                 .configure(UserController::setUpService),
-                        )
-                        .service( // Mount ShippingServiceManager
-                            web::scope("/shippings")
-                                .data(ShippingServiceManager::New(MongoDB.clone()))
-                                .configure(ShippingController::setUpService)
                         )
                         .default_service(
                             web::route().to(|| async { HttpResponse::MethodNotAllowed() }),
