@@ -2,11 +2,11 @@
 #![allow(dead_code)]
 #![allow(unused)]
 
-use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 use actix_files::Files;
+use actix_web::{middleware, web, App, HttpResponse, HttpServer};
+use mongodb::Client;
 use std::env;
 use uuid::Uuid;
-use mongodb::Client;
 
 use crate::api::clients::PostgresClient::PostgresClient;
 
@@ -67,14 +67,14 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::DefaultHeaders::new().header("X-Version", "1.0"))
             .wrap(
                 middleware::DefaultHeaders::new()
-                    .header("X-Request-ID", Uuid::new_v4().to_hyphenated().to_string()),
+                    .header("X-Request-ID", Uuid::new_v4().to_hyphenated().to_string())
+                    .header("Access-Control-Allow-Origin", "*"),
             )
             .wrap(middleware::Logger::default())
             // Liveness probe | Readiness probe
             .route("/healthz", web::get().to(|| HttpResponse::Ok().finish()))
             .service(
-                web::scope("/api")
-                    .service(
+                web::scope("/api").service(
                     web::scope("/v1")
                         .data(web::JsonConfig::default().limit(2048))
                         .wrap(middleware::DefaultHeaders::new().header(
@@ -82,32 +82,38 @@ async fn main() -> std::io::Result<()> {
                             format!("{}{}", "Bearer ", Uuid::new_v4().to_simple()),
                         )) // Example setting response Headers e.g: JWT Token
                         .data(pool.clone()) // Passing PostgreSQL Connection Pooler to the Extractor
-                        .service( // Mount CustomerServiceManager
+                        .service(
+                            // Mount CustomerServiceManager
                             web::scope("/customers")
                                 .data(CustomerServiceManager::New(pool.clone())) // Passing Service Manager Instance to the Extractor
                                 .configure(CustomerController::setUpService), // Mount routes
                         )
-                        .service( // Mount ProductServiceManager
-                                  web::scope("/products")
-                                      .data(ProductServiceManager::New(MongoDB.clone()))
-                                      .configure(ProductController::setUpService),
+                        .service(
+                            // Mount ProductServiceManager
+                            web::scope("/products")
+                                .data(ProductServiceManager::New(MongoDB.clone()))
+                                .configure(ProductController::setUpService),
                         )
-                        .service( // Mount OrderServiceManager
-                                  web::scope("/orders")
-                                      .data(OrderServiceManager::New(pool.clone()))
-                                      .configure(OrderController::setUpService),
+                        .service(
+                            // Mount OrderServiceManager
+                            web::scope("/orders")
+                                .data(OrderServiceManager::New(pool.clone()))
+                                .configure(OrderController::setUpService),
                         )
-                        .service( // Mount InvoiceServiceManager
+                        .service(
+                            // Mount InvoiceServiceManager
                             web::scope("/invoices")
                                 .data(InvoiceServiceManager::New(pool.clone()))
                                 .configure(InvoiceController::setUpService),
                         )
-                        .service( // Mount ShippingServiceManager
-                                  web::scope("/shippings")
-                                      .data(ShippingServiceManager::New(MongoDB.clone()))
-                                      .configure(ShippingController::setUpService)
+                        .service(
+                            // Mount ShippingServiceManager
+                            web::scope("/shippings")
+                                .data(ShippingServiceManager::New(MongoDB.clone()))
+                                .configure(ShippingController::setUpService),
                         )
-                        .service( // Mount UserServiceManager
+                        .service(
+                            // Mount UserServiceManager
                             web::scope("/users")
                                 .data(UserServiceManager::New(pool.clone()))
                                 .configure(UserController::setUpService),
@@ -117,10 +123,17 @@ async fn main() -> std::io::Result<()> {
                         ),
                 ),
             )
-            .service(Files::new("/www", "www").prefer_utf8(true).index_file("index.www")) // Static resources
+            .service(
+                Files::new("/www", "www")
+                    .prefer_utf8(true)
+                    .index_file("index.www"),
+            ) // Static resources
             .default_service(web::route().to(|| HttpResponse::NotFound())) // Default route
     })
-    .bind(format!("0.0.0.0:{}", env::var("HTTP_PORT").unwrap_or("9000".to_string())))?
+    .bind(format!(
+        "0.0.0.0:{}",
+        env::var("HTTP_PORT").unwrap_or("9000".to_string())
+    ))?
     .run()
     .await
 }
