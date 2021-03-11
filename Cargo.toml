@@ -1,15 +1,16 @@
 [package]
 name = "RustMicroservicesSandbox"
 version = "0.1.0"
-authors = ["Giuseppe Gessone <g.gessone@teamsystem.com>", "Paolo Giovannini <p.giovannini@teamsystem.com>"]
+authors = ["Giuseppe Gessone <g.gessone@teamsystem.com>", "Paolo Giovannini <p.giovannini@teamsystem.com>", "Andrea Baldini <a.baldini@teamsystem.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# json_env_logger = "0.1"
+#json_env_logger = { version = "0.1", features = ["iso-timestamps", "backtrace"] }
 actix-cors = "0.5"
-actix-rt = "1.0.0"
+actix-rt = "1"
+actix-files = "0.5"
 actix-web = "3"
 actix-web-httpauth = "0.5"
 async-trait = "0.1"
@@ -26,7 +27,6 @@ serde_json = "1.0"
 time = "0.1"
 tokio-postgres = { version = "0.5", features=["with-chrono-0_4", "with-uuid-0_8"] }
 uuid = { version = "0.8", features = ["serde", "v4"] }
-actix-files = "0.5"
 
 [dev-dependencies]
 actix-rt = "1"

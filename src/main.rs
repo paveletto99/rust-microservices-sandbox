@@ -71,14 +71,20 @@ async fn main() -> std::io::Result<()> {
                     .header("X-Request-ID", Uuid::new_v4().to_hyphenated().to_string())
                     .header(http::header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
                     .header(http::header::ACCESS_CONTROL_ALLOW_METHODS, "GET, POST, PUT, PATCH")
+                    /*
                     .header(http::header::CONTENT_SECURITY_POLICY, "default-src 'self'")
                     .header(http::header::X_FRAME_OPTIONS, "sameorigin")
                     .header(http::header::X_CONTENT_TYPE_OPTIONS, "nosniff")
                     .header(http::header::REFERRER_POLICY, "origin-when-cross-origin")
                     .header("Clear-Site-Data", "*")
+                    */
             )
             // Liveness probe | Readiness probe
             .route("/healthz", web::get().to(|| HttpResponse::Ok().finish()))
+            .data( // TODO: debug Path Extractor
+                web::PathConfig::default()
+                    .error_handler(|err, _| error::InternalError::from_response(err,HttpResponse::InternalServerError().body("Invalid Path")).into())
+            )
             .service(
                 web::scope("/api").service(
                     web::scope("/v1")
