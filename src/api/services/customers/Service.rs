@@ -23,4 +23,19 @@ impl Service {
     pub async fn getCustomers( &self ) -> Result<Vec<Customer>, Error> {
         Ok(self.repository.getCustomers().await?)
     }
+
+    // TODO: Put here business logic and validations
+    pub async fn createCustomers( &self, customer: &Customer ) -> Result<Customer, Error> {
+        Ok(self.repository.createCustomer(customer).await?)
+    }
+
+    // TODO: Put here business logic and validations
+    pub async fn updateCustomers( &self, customer: &Customer ) -> Result<Customer, Error> {
+        Ok(self.repository.updateCustomer(customer).await?)
+    }
+
+    // TODO: Put here business logic and validations
+    pub async fn deleteCustomers( &self, customerId: &Uuid ) -> Result<Uuid, Error> {
+        Ok(self.repository.deleteCustomer(customerId).await?)
+    }
 }

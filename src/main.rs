@@ -3,7 +3,7 @@
 #![allow(unused)]
 
 use actix_files::Files;
-use actix_web::{middleware, web, App, HttpResponse, HttpServer};
+use actix_web::{http, middleware, web, App, HttpResponse, HttpServer, error};
 use mongodb::Client;
 use std::env;
 use uuid::Uuid;
@@ -63,20 +63,33 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             // Default Middlewares
+            .wrap(middleware::Logger::default())
             .wrap(middleware::Compress::default())
-            .wrap(middleware::DefaultHeaders::new().header("X-Version", "1.0"))
             .wrap(
                 middleware::DefaultHeaders::new()
+                    .header("X-Version", "1.0")
                     .header("X-Request-ID", Uuid::new_v4().to_hyphenated().to_string())
-                    .header("Access-Control-Allow-Origin", "*"),
+                    .header(http::header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+                    .header(http::header::ACCESS_CONTROL_ALLOW_METHODS, "GET, POST, PUT, PATCH")
+                    .header(http::header::CONTENT_SECURITY_POLICY, "default-src 'self'")
+                    .header(http::header::X_FRAME_OPTIONS, "sameorigin")
+                    .header(http::header::X_CONTENT_TYPE_OPTIONS, "nosniff")
+                    .header(http::header::REFERRER_POLICY, "origin-when-cross-origin")
+                    .header("Clear-Site-Data", "*")
             )
-            .wrap(middleware::Logger::default())
             // Liveness probe | Readiness probe
             .route("/healthz", web::get().to(|| HttpResponse::Ok().finish()))
             .service(
                 web::scope("/api").service(
                     web::scope("/v1")
-                        .data(web::JsonConfig::default().limit(2048))
+                        .data(
+                            // Json extractor configuration
+                            web::JsonConfig::default()
+                                // Limit request payload size
+                                .limit(4096)
+                                // Handling deserialization errors
+                                .error_handler(|err, _| error::InternalError::from_response(err, HttpResponse::InternalServerError().body("Invalid JSON payload")).into())
+                        )
                         .wrap(middleware::DefaultHeaders::new().header(
                             "Authorization",
                             format!("{}{}", "Bearer ", Uuid::new_v4().to_simple()),
@@ -126,7 +139,7 @@ async fn main() -> std::io::Result<()> {
             .service(
                 Files::new("/www", "www")
                     .prefer_utf8(true)
-                    .index_file("index.www"),
+                    .index_file("index.html"),
             ) // Static resources
             .default_service(web::route().to(|| HttpResponse::NotFound())) // Default route
     })

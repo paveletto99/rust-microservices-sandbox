@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use actix_web::{ web, Responder, HttpResponse };
 use super::CustomerServiceManager;
-use super::Resource::Customer as ResourceCustomer;
+use super::{Resource::NewCustomer as NewCustomerResource, Resource::UpdateCustomer as UpdateCustomerResource};
 use crate::api::commons::ApiController;
 use uuid::Uuid;
 
@@ -50,17 +50,17 @@ impl Controller {
     }
 
     // TODO: To be implemented
-    async fn createCustomerHandler(_service: web::Data<CustomerServiceManager>, _customer: web::Json<ResourceCustomer>) -> impl Responder {
-        web::Json(ResourceCustomer::default())
+    async fn createCustomerHandler(_service: web::Data<CustomerServiceManager>, customer: web::Json<NewCustomerResource>) -> impl Responder {
+        HttpResponse::Created().json(customer.into_inner())
     }
 
     // TODO: To be implemented
-    async fn updateCustomerHandler(_service: web::Data<CustomerServiceManager>) -> impl Responder {
-        web::Json(ResourceCustomer::default())
+    async fn updateCustomerHandler(service: web::Data<CustomerServiceManager>, customer: web::Json<UpdateCustomerResource>) -> impl Responder {
+        HttpResponse::Ok().json(customer.into_inner())
     }
 
     // TODO: To be implemented
-    async fn deleteCustomerHandler(_service: web::Data<CustomerServiceManager>) -> impl Responder {
-        web::Json(ResourceCustomer::default())
+    async fn deleteCustomerHandler(_service: web::Data<CustomerServiceManager>, customerId: web::Path<Uuid>) -> impl Responder {
+        HttpResponse::Accepted().json(customerId.into_inner())
     }
 }

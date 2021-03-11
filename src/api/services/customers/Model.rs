@@ -6,7 +6,7 @@ use uuid::Uuid;
 pub struct Customer {
     id: Uuid,
     vatCode: String,
-    name: String,
+    companyName: String,
     createdOn: Option<DateTime<Utc>>
 }
 
@@ -28,12 +28,12 @@ impl Customer {
         &self.vatCode
     }
 
-    pub fn setCustomerName(&mut self, name: String) {
-        self.name = name
+    pub fn setCompanyName(&mut self, companyName: String) {
+        self.companyName = companyName
     }
 
-    pub fn getCustomerName(&self) -> &String {
-        &self.name
+    pub fn getCompanyName(&self) -> &String {
+        &self.companyName
     }
 
     pub fn setCreatedOn(&mut self, createdOn: DateTime<Utc>) {

@@ -3,9 +3,14 @@ use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Default)]
-pub struct Customer {
+pub struct NewCustomer {
+    vatCode: String,
+    companyName: String
+}
+
+#[derive(Serialize, Deserialize, Default)]
+pub struct UpdateCustomer {
     id: Uuid,
     vatCode: String,
-    name: String,
-    createdOn: Option<DateTime<Utc>>
+    companyName: String
 }
