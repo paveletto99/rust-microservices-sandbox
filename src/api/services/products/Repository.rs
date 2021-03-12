@@ -3,6 +3,7 @@ use bson::{Document, doc};
 use crate::api::commons::Errors::ApplicationError;
 use super::Model::Product;
 use uuid::Uuid;
+use futures::{TryFutureExt, StreamExt};
 
 pub struct Repository {
     MongoDB: Database
@@ -34,7 +35,15 @@ impl Repository {
     }
 
     pub async fn getProducts( &self ) -> Result<Vec<Product>, ApplicationError> {
-        Ok(vec![Product::New(), Product::New(), Product::New()])
+
+        let mut cursor = self.getCollection().find(None, None).await?;
+        let mut result: Vec<Product> = Vec::new();
+
+        while let Some(doc) = cursor.next().await {
+            result.push(bson::from_document::<Product>(doc.unwrap())?);
+        }
+
+        Ok(result)
     }
 
     pub async fn createProduct( &self, product: &mut Product ) -> Result<Product, ApplicationError> {

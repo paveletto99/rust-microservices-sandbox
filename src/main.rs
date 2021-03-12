@@ -9,6 +9,8 @@ use std::env;
 use uuid::Uuid;
 
 use crate::api::clients::PostgresClient::PostgresClient;
+use crate::api::migrations::PostgreSQLMigration;
+use crate::api::migrations::MongoDBMigration;
 
 // Application Modules
 mod api;
@@ -16,7 +18,7 @@ use api::commons::ApiController;
 // Customers API
 use api::services::customers::CustomerController;
 use api::services::customers::CustomerServiceManager;
-// Products API
+// Products API W.I.P.
 use api::services::products::ProductController;
 use api::services::products::ProductServiceManager;
 // Orders API
@@ -40,12 +42,17 @@ async fn main() -> std::io::Result<()> {
 
     // PostgreSQL Connection Pool
     let pool = PostgresClient::get_default_pool().await.unwrap();
+    // Database initialization or migration
+    PostgreSQLMigration::migrate(pool.clone()).await;
 
     // MongoDB Connection Pool
     let MongoDBURI = env::var("MONGODB_URI").expect("MONGODB_URI not set");
     let MongoDBDatabaseName = env::var("MONGODB_DBNAME").expect("MONGODB_DBNAME not set");
     let MongoDBClient = Client::with_uri_str(&MongoDBURI).await.unwrap();
     let MongoDB = MongoDBClient.database(&MongoDBDatabaseName);
+
+    // Database initialization or migration
+    MongoDBMigration::migrate(MongoDB.clone()).await;
 
     // MongoDB Alternative connection method for more control over the Connection Pooler and Read/Write Concerns
     /*

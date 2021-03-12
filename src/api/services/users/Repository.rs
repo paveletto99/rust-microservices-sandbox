@@ -19,7 +19,7 @@ impl Repository {
         let client: Client = self.pgPool.get().await.unwrap();
         let stmt = client
             .prepare(
-                "SELECT user_id, username, password, email, created_on FROM accounts WHERE user_id = $1",
+                "SELECT user_id, username, password, email, created_on FROM tbl_accounts WHERE user_id = $1",
             )
             .await
             .unwrap();
@@ -40,7 +40,7 @@ impl Repository {
         let pg_id = user_id as i32; // cast to i32 https://doc.rust-lang.org/1.30.0/book/first-edition/casting-between-types.html
         let client: Client = self.pgPool.get().await.unwrap();
         let stmt = client
-            .prepare("DELETE FROM accounts WHERE user_id = $1 RETURNING *")
+            .prepare("DELETE FROM tbl_accounts WHERE user_id = $1 RETURNING *")
             .await
             .unwrap();
         let rows = client.query(&stmt, &[&pg_id]).await.unwrap();
@@ -63,7 +63,7 @@ impl Repository {
         let utc_time = DateTime::<Utc>::from_utc(local_time.naive_utc(), Utc);
         client
             .execute(
-                "INSERT INTO accounts (username, password, email, created_on) VALUES ($1, $2, $3, $4)",
+                "INSERT INTO tbl_accounts (username, password, email, created_on) VALUES ($1, $2, $3, $4)",
                 &[
                     &user.get_username(),
                     &user.get_password(),
@@ -84,7 +84,7 @@ impl Repository {
         client
             .execute(
                 "
-                UPDATE accounts
+                UPDATE tbl_accounts
                 SET username = $2, password = $3, email = $4
                 WHERE user_id = $1
                 ",

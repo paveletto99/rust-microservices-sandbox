@@ -2,10 +2,10 @@ export PG_HOST=127.0.0.1
 export PG_PORT=5432
 export PG_USER=postgres
 export PG_PASS=
-export PG_DBNAME=postgres
+export PG_DBNAME=techtalk
 export PG_DSN=postgresql://${PG_USER}:${PG_PASS}@${PG_HOST}:${PG_PORT}/${PG_DBNAME}?connect_timeout=10
 export MONGODB_URI=mongodb://localhost:27017
-export MONGODB_DBNAME="rustmicroservices"
+export MONGODB_DBNAME=${PG_DBNAME}
 
 KIND_CREATE_CLUSTER_SCRIPT=$(CURDIR)/kubernetes/kind/kind-create-cluster-with-registry
 KIND_NETWORK_NAME=kind

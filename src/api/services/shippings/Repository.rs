@@ -1,7 +1,8 @@
-use mongodb::{Database, Collection};
-use bson::{Document, doc};
+use mongodb::{Database, Collection, Cursor};
+use bson::{Document, doc, from_document};
 use crate::api::commons::Errors::ApplicationError;
 use super::Model::Shipping;
+use futures::{TryFutureExt, StreamExt};
 
 pub struct Repository {
     MongoDB: Database
@@ -66,7 +67,17 @@ impl Repository {
     }
 
     pub async fn getShippings( &self ) -> Result<Vec<Shipping>, ApplicationError> {
-        Ok(vec![Shipping::New(), Shipping::New(), Shipping::New()])
+
+        //Ok(vec![Shipping::New(), Shipping::New(), Shipping::New()])
+
+        let mut cursor = self.getCollection().find(None, None).await?;
+        let mut result: Vec<Shipping> = Vec::new();
+
+        while let Some(doc) = cursor.next().await {
+            result.push(bson::from_document::<Shipping>(doc.unwrap())?);
+        }
+
+        Ok(result)
     }
 
     pub async fn createShipping( &self, model: Shipping ) -> Result<Shipping, ApplicationError> {
